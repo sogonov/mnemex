@@ -36,16 +36,20 @@ shift 2
 USE_MARKER=0
 FORCE_OCR=0
 KEEP_INTERMEDIATE=0
+NO_BREADCRUMB=0
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --marker) USE_MARKER=1 ;;
     --ocr)    FORCE_OCR=1 ;;
     --keep)   KEEP_INTERMEDIATE=1 ;;
+    --no-breadcrumb) NO_BREADCRUMB=1 ;;
     *) echo "Unknown option: $1"; exit 1 ;;
   esac
   shift
 done
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 WIKI_ROOT="${WIKI_ROOT:-${BRAIN_DIR:-$HOME/mnemex}}"
 OUT_DIR="$WIKI_ROOT/raw/books/$SLUG"
@@ -184,6 +188,15 @@ case "$EXT_LOWER" in
     exit 1
     ;;
 esac
+
+# ---- contextual breadcrumbs (Contextual Retrieval, conversion-time) ----
+# Inject ancestor-path breadcrumbs under nested headings so deep chunks stay
+# self-locating once qmd chunks the book. Runs BEFORE any wiki claim cites a line,
+# so provenance is computed against the breadcrumbed file. Opt out with --no-breadcrumb.
+if [ "$NO_BREADCRUMB" -eq 0 ] && command -v node >/dev/null 2>&1 && [ -f "$SCRIPT_DIR/breadcrumb.mjs" ]; then
+  log "Injecting contextual breadcrumbs (--no-breadcrumb to skip)"
+  node "$SCRIPT_DIR/breadcrumb.mjs" "$OUT_DIR/book.md" || log "breadcrumb pass skipped (non-fatal)"
+fi
 
 # ---- meta.yaml stub ----
 cat > "$OUT_DIR/meta.yaml" <<EOF
