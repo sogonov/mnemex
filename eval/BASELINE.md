@@ -52,6 +52,31 @@ breadcrumb, no graph). Same corpus + the `mnemex-wiki` collection.
 - **Arms B (contextual breadcrumb) and C (typed-graph expansion)** re-run this identical fixture;
   the delta on the `cross-source` and `cross-lingual` buckets is the relaunch graph.
 
+## Arm C — typed-graph expansion + cross-encoder union rerank
+
+`node eval/run-retrieval-graph.mjs` (arm A vs arm C, **paired**, one qmd process). Arm C:
+seeds = arm A hybrid → walk the typed wikilink edges (`graph-expand.mjs`: Contrasted-with /
+Contradicts / See-also, edge-weighted) → union(seeds, neighbors) → `store.internal.rerank(query, union)`
+(the cross-encoder over the union — the guardrail, verified reachable via the qmd SDK).
+
+| bucket | arm A nDCG@10 | arm C nDCG@10 | R@10 A→C |
+|---|---|---|---|
+| exact/title, single-hop | 100.0 | 100.0 | no regression |
+| **cross-source** (all 9) | 46.5 | **64.7 ↑** | **50.0 → 77.8** |
+| cross-lingual | 83.3 | 83.3 | unchanged (no graph edges walked) |
+| **held-out cross-source** (n=5) | 32.3 | **46.3** | **Δ +14.1 pts** |
+| no-answer | — | 4/4 abstained | arm C safe (no seeds → no expansion) |
+
+**Honest read.** The leapfrog **mechanism works**: graph expansion pulls the missed second
+source (via `Contrasted-with`/`See-also` edges) into the union, and the cross-encoder ranks it
+up — lifting cross-source Recall@10 from **50% → 77.8%**. **But at n=5 held-out the +14.1-pt nDCG
+lift is NOT statistically significant** (paired permutation *p* = 0.25; 95% CIs
+A[7.7, 56.8] vs C[12.5, 80.2] overlap). This is the design's own caveat: significance needs
+**~20 held-out cross-source queries**, not 5. Established: the mechanism, the direction, and
+**no regression** on easy buckets + preserved no-answer abstention. Pending: a held-out set
+large enough to claim significance. I authored both the edges and the held-out queries, so an
+independent check of circularity is warranted before quoting this as a headline.
+
 ## The 2 misses (Phase 2 targets)
 
 Both are cross-domain queries needing **two** source pages, where only one was
@@ -69,5 +94,11 @@ export QMD_EMBED_MODEL="hf:Qwen/Qwen3-Embedding-0.6B-GGUF/Qwen3-Embedding-0.6B-Q
 # corpus.md steps build eval/.wiki and register the mnemex-wiki qmd collection
 node eval/run.mjs                                   # citation + recall (qmd bench)
 node eval/run-retrieval.mjs --label A-plain --out eval/results-A-plain.json  # arm A
-node eval/metrics.mjs --selftest && node eval/stats.mjs --selftest           # unit tests
+node eval/run-retrieval-graph.mjs                                            # arm A vs C (graph)
+node eval/metrics.mjs --selftest && node eval/stats.mjs --selftest \
+  && node eval/graph-expand.mjs --selftest eval/.wiki/wiki                   # unit tests
 ```
+
+The eval wiki **pages** (`eval/.wiki/wiki/`, incl. the typed cross-source edges the graph walks)
+are committed. Only the raw book texts (`eval/.wiki/raw/`) and the qmd index are rebuilt from
+`corpus.md`.

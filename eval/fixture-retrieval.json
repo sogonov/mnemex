@@ -19,6 +19,12 @@
     { "id": "cross-self-discipline", "q": "self-discipline and self-mastery in leaders", "bucket": "cross-source", "split": "dev", "expected_files": ["sources/Meditations-Marcus-Aurelius.md", "sources/Autobiography-Franklin.md"] },
     { "id": "cross-strategy-politics", "q": "outmaneuvering rivals through strategy", "bucket": "cross-source", "split": "dev", "expected_files": ["sources/Art-of-War-Sun-Tzu.md", "sources/The-Prince-Machiavelli.md"] },
 
+    { "id": "hcs-power-vs-virtue", "q": "power through strategy versus power through personal virtue", "bucket": "cross-source", "split": "holdout", "expected_files": ["sources/The-Prince-Machiavelli.md", "sources/Meditations-Marcus-Aurelius.md"] },
+    { "id": "hcs-master-self", "q": "how a leader masters himself before leading others", "bucket": "cross-source", "split": "holdout", "expected_files": ["sources/Meditations-Marcus-Aurelius.md", "sources/Autobiography-Franklin.md"] },
+    { "id": "hcs-reputation", "q": "the place of reputation and appearances in getting ahead", "bucket": "cross-source", "split": "holdout", "expected_files": ["sources/The-Prince-Machiavelli.md", "sources/Autobiography-Franklin.md"] },
+    { "id": "hcs-discipline-mind-state", "q": "discipline of the mind versus discipline of the state", "bucket": "cross-source", "split": "holdout", "expected_files": ["sources/Meditations-Marcus-Aurelius.md", "sources/The-Prince-Machiavelli.md"] },
+    { "id": "hcs-foresight-force", "q": "prevailing by foresight rather than brute force", "bucket": "cross-source", "split": "holdout", "expected_files": ["sources/Art-of-War-Sun-Tzu.md", "sources/The-Prince-Machiavelli.md"] },
+
     { "id": "xl-feared-loved-ru", "q": "лучше ли правителю быть в страхе или в любви у народа", "bucket": "cross-lingual", "split": "holdout", "expected_files": ["sources/The-Prince-Machiavelli.md"] },
     { "id": "xl-deception-ru", "q": "как обманывать врага перед сражением", "bucket": "cross-lingual", "split": "holdout", "expected_files": ["sources/Art-of-War-Sun-Tzu.md"] },
     { "id": "xl-control-ru", "q": "принятие того, что не в нашей власти", "bucket": "cross-lingual", "split": "holdout", "expected_files": ["sources/Meditations-Marcus-Aurelius.md"] },

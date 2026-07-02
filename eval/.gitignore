@@ -1,5 +1,10 @@
-# The built eval wiki is a large, regenerable artifact — keep it out of git.
-.wiki/
+# Track the hand-authored eval wiki pages (.wiki/wiki/ — the synthesis + typed graph
+# the eval walks), but ignore everything else under .wiki/: the bulky raw book texts,
+# the copied template scaffold, and any local qmd/obsidian state. Rebuild raw/ + the
+# qmd index from corpus.md.
+.wiki/*
+!.wiki/wiki/
+.wiki/wiki/.obsidian/
 
 # Per-run retrieval result dumps — regenerable; recorded numbers live in BASELINE.md.
 results-*.json
