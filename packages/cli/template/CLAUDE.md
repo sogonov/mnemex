@@ -120,7 +120,7 @@ When a new file appears in `raw/` (or the owner asks you to ingest something):
 
 1. **Read the source.** For books, read the whole thing — don't skim. For long books, you may need multiple passes.
 2. **Discuss key takeaways** with the owner in 3–5 bullet points before writing anything. Wait for direction on what to emphasize.
-3. **Create a source page** in `wiki/sources/` using `templates/source.md`. Fill in: bibliographic meta, TOC, chapter-by-chapter summary, list of extracted claims **each with a `^[raw-path:Lstart-Lend]` provenance token** (see **Provenance** above — this is mandatory, lint enforces it), list of key entities and concepts mentioned (as wikilinks).
+3. **Create a source page** in `wiki/sources/` using `templates/source.md`. Fill in: bibliographic meta (**read `raw/books/<slug>/meta.yaml` — it's auto-filled from the source header; copy it, only research what's blank**), TOC, chapter-by-chapter summary, list of extracted claims **each with a `^[raw-path:Lstart-Lend]` provenance token** (see **Provenance** above — this is mandatory, lint enforces it), list of key entities and concepts mentioned (as wikilinks).
 4. **Update or create entity pages** for people, books, companies, tools mentioned. Use `templates/entity.md`.
 5. **Update or create concept pages** for ideas, patterns, frameworks. Use `templates/concept.md`. **Before creating a new concept page, search `index.md` and all `aliases:` fields for synonyms.** If a similar concept exists, extend the existing page or add an alias rather than creating a duplicate.
 6. **Update `index.md`** — add new pages to their category section.
@@ -316,3 +316,13 @@ If the search MCP server is connected (`mnemex-search`, powered by qmd), you hav
 If filesystem access is available (Cowork / Claude Code with direct file access), you can `Read`/`Grep`/`Glob` directly.
 
 To download and ingest books into `raw/books/`, the `@mnemex/library-mcp` server provides search + download tools for Project Gutenberg and Anna's Archive. The conversion script lives at `scripts/ingest-book.sh` (run `scripts/setup-converters.sh` once to install pandoc/calibre/etc).
+
+**The conversion pipeline runs automatically** in `ingest-book.sh` (opt-outs in parens), so `raw/books/<slug>/book.md` arrives clean:
+1. **`extract-meta.mjs`** — auto-fills `meta.yaml` (title / author / year / language / eBook-id / translator / editor) from the Gutenberg header, so **you rarely fill bibliographic meta by hand** — read `meta.yaml` first and only fill what's blank.
+2. **`strip-boilerplate.mjs`** — removes the Project Gutenberg license header + footer (`--keep-boilerplate`).
+3. **`structure.mjs`** — promotes flat `BOOK/PART/CHAPTER …` division markers to real ATX headings so search chunks along chapters (`--no-structure`).
+4. **`breadcrumb.mjs`** — injects ancestor-path breadcrumbs under nested headings (`--no-breadcrumb`).
+
+All four are conversion-time (before any `^[raw:L-L]` token exists → line numbers stay stable), idempotent, and multilingual-safe. They no-op on non-Gutenberg / heading-less sources.
+
+**Retrofit old books:** for anything ingested before these passes existed, run `mnemex clean-raw` (or `node scripts/clean-raw.mjs --wiki .`) — it applies the same pipeline to every `raw/books/*/book.md`. Use `--dry-run` first to preview; it's idempotent, so a second run is a no-op.
