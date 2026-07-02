@@ -94,8 +94,15 @@ Ruthless scoping is the point: "merge everything" kills solo projects. Ship each
   gone from the index — identical legal text that was surfacing as retrieval noise and matching
   every book at once. Runs FIRST in `ingest-book.sh` (before structure/breadcrumb) so every
   `^[raw:L-L]` line number is boilerplate-free from the start. No-op on non-Gutenberg sources;
-  idempotent; opt out `--keep-boilerplate`. Conversion pipeline is now:
-  convert → strip-boilerplate → structure → breadcrumb → meta.
+  idempotent; opt out `--keep-boilerplate`.
+- [x] **Auto-extract metadata from the Gutenberg header.** `scripts/extract-meta.mjs` parses the
+  license header (which the strip pass throws away) for Title / Author / Translator / Editor /
+  Release-date / Language / eBook-id and fills the `meta.yaml` stub — only empty fields, never
+  clobbering a hand-set value. Runs BEFORE strip (header still present). **16/16 eval books
+  auto-filled** title+author+year+gutenberg_id+language (translator/editor where present); before,
+  `meta.yaml` shipped empty for the owner to type by hand. Main-module gated, `--json` mode, selftest.
+  Conversion pipeline is now:
+  convert → **meta stub → extract-meta** → strip-boilerplate → structure → breadcrumb.
 - [x] **Reranking** — already delivered by qmd (qwen3-reranker); confirmed the dominant lever. Nothing to build.
 - [x] **Cross-lingual moat** — proven (RU→EN ≈83%), no build needed.
 - 🅿️ **Typed-graph retrieval** — parked R&D (eval-only, unproven; see Progress section). Not a phase deliverable.

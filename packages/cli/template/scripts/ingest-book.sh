@@ -193,35 +193,6 @@ case "$EXT_LOWER" in
     ;;
 esac
 
-# ---- strip Project Gutenberg license boilerplate ----
-# Drop the ~25-line license header + long license footer that bracket every
-# Gutenberg text (delimited by *** START *** / *** END *** markers). Runs FIRST so
-# all downstream line numbers — and every ^[raw:L-L] provenance token — are clean.
-# No markers (non-Gutenberg source) → no-op. Opt out with --keep-boilerplate.
-if [ "$KEEP_BOILERPLATE" -eq 0 ] && command -v node >/dev/null 2>&1 && [ -f "$SCRIPT_DIR/strip-boilerplate.mjs" ]; then
-  log "Stripping Project Gutenberg boilerplate (--keep-boilerplate to skip)"
-  node "$SCRIPT_DIR/strip-boilerplate.mjs" "$OUT_DIR/book.md" || log "strip-boilerplate skipped (non-fatal)"
-fi
-
-# ---- structure recovery (Gutenberg plain text → ATX headings) ----
-# Promote flat division markers (BOOK/PART/CHAPTER … + numeral) to real headings so
-# qmd can chunk heading-aware and the breadcrumb pass has anchors. High precision,
-# body-confined, idempotent. Runs first (before breadcrumb + before any provenance
-# token exists). Opt out with --no-structure.
-if [ "$NO_STRUCTURE" -eq 0 ] && command -v node >/dev/null 2>&1 && [ -f "$SCRIPT_DIR/structure.mjs" ]; then
-  log "Recovering heading structure (--no-structure to skip)"
-  node "$SCRIPT_DIR/structure.mjs" "$OUT_DIR/book.md" || log "structure pass skipped (non-fatal)"
-fi
-
-# ---- contextual breadcrumbs (Contextual Retrieval, conversion-time) ----
-# Inject ancestor-path breadcrumbs under nested headings so deep chunks stay
-# self-locating once qmd chunks the book. Runs BEFORE any wiki claim cites a line,
-# so provenance is computed against the breadcrumbed file. Opt out with --no-breadcrumb.
-if [ "$NO_BREADCRUMB" -eq 0 ] && command -v node >/dev/null 2>&1 && [ -f "$SCRIPT_DIR/breadcrumb.mjs" ]; then
-  log "Injecting contextual breadcrumbs (--no-breadcrumb to skip)"
-  node "$SCRIPT_DIR/breadcrumb.mjs" "$OUT_DIR/book.md" || log "breadcrumb pass skipped (non-fatal)"
-fi
-
 # ---- meta.yaml stub ----
 cat > "$OUT_DIR/meta.yaml" <<EOF
 slug: $SLUG
@@ -237,6 +208,42 @@ language: ""
 pages:
 llm_ingested: false
 EOF
+
+# ---- auto-fill metadata from the Gutenberg header (BEFORE strip removes it) ----
+# The license header carries Title/Author/Translator/Editor/Release-date/Language.
+# Parse it into meta.yaml so the owner doesn't retype it. Only fills empty fields.
+if command -v node >/dev/null 2>&1 && [ -f "$SCRIPT_DIR/extract-meta.mjs" ]; then
+  log "Extracting metadata from Gutenberg header"
+  node "$SCRIPT_DIR/extract-meta.mjs" "$OUT_DIR/book.md" "$OUT_DIR/meta.yaml" || log "extract-meta skipped (non-fatal)"
+fi
+
+# ---- strip Project Gutenberg license boilerplate ----
+# Drop the ~25-line license header + long license footer that bracket every
+# Gutenberg text (delimited by *** START *** / *** END *** markers). Runs after
+# metadata extraction so all downstream line numbers — and every ^[raw:L-L]
+# provenance token — are clean. No markers (non-Gutenberg) → no-op. --keep-boilerplate.
+if [ "$KEEP_BOILERPLATE" -eq 0 ] && command -v node >/dev/null 2>&1 && [ -f "$SCRIPT_DIR/strip-boilerplate.mjs" ]; then
+  log "Stripping Project Gutenberg boilerplate (--keep-boilerplate to skip)"
+  node "$SCRIPT_DIR/strip-boilerplate.mjs" "$OUT_DIR/book.md" || log "strip-boilerplate skipped (non-fatal)"
+fi
+
+# ---- structure recovery (Gutenberg plain text → ATX headings) ----
+# Promote flat division markers (BOOK/PART/CHAPTER … + numeral) to real headings so
+# qmd can chunk heading-aware and the breadcrumb pass has anchors. High precision,
+# body-confined, idempotent. Opt out with --no-structure.
+if [ "$NO_STRUCTURE" -eq 0 ] && command -v node >/dev/null 2>&1 && [ -f "$SCRIPT_DIR/structure.mjs" ]; then
+  log "Recovering heading structure (--no-structure to skip)"
+  node "$SCRIPT_DIR/structure.mjs" "$OUT_DIR/book.md" || log "structure pass skipped (non-fatal)"
+fi
+
+# ---- contextual breadcrumbs (Contextual Retrieval, conversion-time) ----
+# Inject ancestor-path breadcrumbs under nested headings so deep chunks stay
+# self-locating once qmd chunks the book. Runs before any wiki claim cites a line.
+# Opt out with --no-breadcrumb.
+if [ "$NO_BREADCRUMB" -eq 0 ] && command -v node >/dev/null 2>&1 && [ -f "$SCRIPT_DIR/breadcrumb.mjs" ]; then
+  log "Injecting contextual breadcrumbs (--no-breadcrumb to skip)"
+  node "$SCRIPT_DIR/breadcrumb.mjs" "$OUT_DIR/book.md" || log "breadcrumb pass skipped (non-fatal)"
+fi
 
 # ---- cleanup ----
 if [ "$KEEP_INTERMEDIATE" -eq 0 ]; then
