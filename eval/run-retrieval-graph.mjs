@@ -41,6 +41,7 @@ const collection = arg("--collection", "mnemex-wiki");
 const wikiRoot = arg("--wiki-root", join(evalDir, ".wiki", "wiki"));
 const fixturePath = arg("--fixture", join(evalDir, "fixture-retrieval.json"));
 const SEED_K = parseInt(arg("--seed-k", "12"), 10);
+const D_POOL = parseInt(arg("--d-pool", "50"), 10); // arm D: rerank a broad retrieval pool (rerank-ALL is infeasible on a large corpus)
 const K = 10;
 const Cl = { g: "\x1b[0;32m", y: "\x1b[1;33m", r: "\x1b[0;31m", d: "\x1b[2m", b: "\x1b[1m", x: "\x1b[0m" };
 
@@ -50,7 +51,7 @@ const bodyOf = (rel) => { const p = join(wikiRoot, rel); return existsSync(p) ? 
 
 const fixture = JSON.parse(readFileSync(fixturePath, "utf8"));
 const pageIndex = buildPageIndex(wikiRoot);
-const allPages = [...pageIndex.values()].filter((p) => /\.md$/.test(p)).map((rel) => ({ file: rel, text: bodyOf(rel) || rel }));
+const corpusSize = [...pageIndex.values()].filter((p) => /\.md$/.test(p)).length;
 
 // Does a typed edge bridge the two gold pages (either direction)? → "edged" (circular).
 function isEdged(expected) {
@@ -73,8 +74,10 @@ const rows = [];
 for (let i = 0; i < fixture.queries.length; i++) {
   const q = fixture.queries[i];
   process.stderr.write(`  [${i + 1}/${fixture.queries.length}] ${q.id}                    \r`);
-  const hits = await store.search({ query: q.q, collections: [collection], limit: SEED_K });
-  const seeds = hits.map((h) => ({ rel: norm(h.file), text: h.bestChunk || stripFm(h.body || "") }));
+  // one broad search per query: top-SEED_K are the seeds; the whole pool (≤ D_POOL) is arm D.
+  const hits = await store.search({ query: q.q, collections: [collection], limit: D_POOL });
+  const poolDocs = hits.map((h) => ({ file: norm(h.file), text: h.bestChunk || stripFm(h.body || "") }));
+  const seeds = poolDocs.slice(0, SEED_K).map((d) => ({ rel: d.file, text: d.text }));
   const seedDocs = seeds.map((s) => ({ file: s.rel, text: s.text || s.rel }));
   const topScore = hits.length ? hits[0].score : 0;
 
@@ -92,7 +95,7 @@ for (let i = 0; i < fixture.queries.length; i++) {
   const armA = seeds.map((s) => s.rel);
   const armB = seedDocs.length ? await rerankTo(q.q, seedDocs) : [];
   const armC = unionDocs.length ? await rerankTo(q.q, unionDocs) : [];
-  const armD = await rerankTo(q.q, allPages);
+  const armD = poolDocs.length ? await rerankTo(q.q, poolDocs) : [];
   rows.push({
     id: q.id, bucket: q.bucket, split: q.split || "dev", edged: isEdged(q.expected_files),
     grew: union.size - seeds.length,
@@ -108,7 +111,7 @@ const ans = rows.filter((r) => !r.noAnswer);
 const pct = (v) => (v == null ? " n/a " : (v * 100).toFixed(1).padStart(5));
 const agg = (rs, arm) => mean(rs.map((r) => r[arm].ndcg));
 
-console.log(`\n${Cl.b}4-arm ablation — nDCG@${K}${Cl.x}  ${Cl.d}A=qmd hybrid · B=rerank(seeds) · C=rerank(seeds+graph) · D=rerank(all)${Cl.x}\n`);
+console.log(`\n${Cl.b}4-arm ablation — nDCG@${K}${Cl.x}  ${Cl.d}A=qmd hybrid · B=rerank(seeds) · C=rerank(seeds+graph) · D=rerank(top-${D_POOL} pool)${Cl.x}\n`);
 console.log(`  ${"bucket".padEnd(20)} ${"n".padStart(2)}    A     B     C     D    ${Cl.d}(B→C = graph's marginal effect)${Cl.x}`);
 console.log(`  ${"-".repeat(60)}`);
 for (const bk of [...new Set(ans.map((r) => r.bucket))]) {
@@ -127,7 +130,7 @@ for (const [name, rs] of [["EDGED (circular)", hold.filter((r) => r.edged)], ["U
 }
 const na = rows.filter((r) => r.noAnswer);
 if (na.length) console.log(`\n  no-answer abstention: ${na.filter((r) => r.abstained).length}/${na.length}`);
-if (K >= allPages.length)
-  console.log(`  ${Cl.d}Note: k=${K} ≥ |corpus|=${allPages.length} — recall is degenerate (top-k ⊇ corpus); this measures DIRECTION only. Grow the corpus.${Cl.x}`);
+if (corpusSize <= D_POOL)
+  console.log(`  ${Cl.d}|corpus|=${corpusSize} ≤ D-pool ${D_POOL}: arm D reranks ~the whole corpus — a strong ceiling. The graph's edge over D only shows once |corpus| ≫ D-pool (rerank-all impractical).${Cl.x}`);
 else
-  console.log(`  ${Cl.d}|corpus|=${allPages.length} pages, k=${K} < corpus → recall@${K} is non-degenerate. Arm D reranks ALL ${allPages.length} pages — a strong ceiling on a still-small corpus; the graph's edge over D needs a corpus big enough that rerank-all is impractical.${Cl.x}`);
+  console.log(`  ${Cl.d}|corpus|=${corpusSize} ≫ D-pool ${D_POOL}: arm D = rerank a broad top-${D_POOL} retrieval (rerank-ALL infeasible). C beating D here is the graph earning its keep at scale.${Cl.x}`);
