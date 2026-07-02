@@ -14,7 +14,8 @@
   ],
   "scripts": {
     "build": "pnpm -r build",
-    "dev": "pnpm -r dev"
+    "dev": "pnpm -r dev",
+    "eval": "node eval/run.mjs"
   },
   "engines": {
     "node": ">=20"

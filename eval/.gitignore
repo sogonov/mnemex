@@ -1,0 +1,2 @@
+# The built eval wiki is a large, regenerable artifact — keep it out of git.
+.wiki/
