@@ -31,21 +31,55 @@ the two main competitors while staying small and focused.
 
 **Not unique — do NOT market as differentiators:** typed relationships, contradiction flags, Obsidian compatibility, MCP server, the three-layer Karpathy pattern (all three have these).
 
+## Progress — 2026-07-02 session (branch `phase-1-and-retrieval-design`, NOT merged to main)
+
+**Done & committed (12 commits on the branch):**
+- **Phase 1 — DONE.** Claim-level provenance `^[raw/books/<slug>/book.md:Lstart-Lend]` in
+  `templates/{source,concept,synthesis}.md` + `wiki-template/CLAUDE.md`; `scripts/lint-citations.mjs`
+  (MISSING/MALFORMED/UNRESOLVABLE) + `mnemex lint` CLI. Mini-eval `eval/` (corpus.md, fixture,
+  questions, run.mjs, metrics.mjs nDCG/MAP/MRR, stats.mjs bootstrap+permutation) — credibility-grade.
+- **Prose pack — DONE.** Ported the owner's brain conventions into the product: Contradictions &
+  tensions (Contradiction/Tension/Composition + boundary Resolution), cite-or-abstain + language
+  directive + two-tier query playbook, `hot.md` rolling cache.
+- **Competitive analysis — DONE.** Full code-read of both competitors → `projects/mnemex-launch/mnemex-strategy-take-the-best.md`
+  and `docs/methodology/contextual-retrieval-design.md`. llmwiki ≈28k LOC, claude-obsidian ≈4k+prose.
+- **MCP stdio hygiene** working-agreement added to repo `CLAUDE.md` (the "stdout bug" was a false
+  alarm — library-mcp already logs to stderr).
+
+**Phase 2 — findings (mostly measured, little to build):**
+- **Reranking is the real retrieval lever — and qmd already does it** (qwen3-reranker). Nothing to build.
+- **Cross-lingual moat proven** (RU→EN ≈83%, arm A) — competitors' English-default stacks ≈0. Un-confounded win.
+- **Contextual breadcrumb (2b): designed, NOT built** — headroom expected small (qmd already embeds title+headings).
+- **Typed-graph retrieval (an "add-our-own" bet, not from competitors): PARKED R&D.** Lives only in
+  `eval/` (never in the product). Tested on 5→17→615-page corpora with independent-authorship to
+  break circularity. Result: directional at scale (C crosses over brute-force D at 615 pages) but
+  **never statistically significant** (brain retest C-vs-D p=0.29, C-vs-B p=0.14, n=43). Do NOT
+  headline it. See `eval/BASELINE.md` for the full honest write-up.
+
+**Environment:** `qmd` updated 2.5.1 → **2.5.3** (fixes the cosmetic GGML_ASSERT teardown crash).
+The user path (`mnemex init` → ingest → `qmd query` ~1s) never crashed; the kills were long internal
+benchmark scripts hitting session limits, not the product.
+
+**Relaunch-ready (proven, un-confounded):** provenance-to-line · credibility eval methodology ·
+cross-lingual moat · honest competitor analysis · reranking (via qmd). The graph is NOT part of the pitch.
+
 ## Roadmap — phased, each phase ships on its own
 
 Ruthless scoping is the point: "merge everything" kills solo projects. Ship each phase.
 
-### Phase 1 — cheap credibility (do first; unblocks the relaunch)
-- [ ] **Claim-level provenance.** Add `^[<source-slug>.md:Lstart-Lend]` (or chapter ref) to extracted claims. Touch: `apps/wiki-template/templates/{source,concept}.md`, `apps/wiki-template/CLAUDE.md` (instruct the agent to cite source location), and add a lint rule that flags malformed/missing citations.
-- [ ] **Mini eval harness.** 15–20 fixed Q&A over a small known corpus (e.g. 3–4 public-domain books). Script measures retrieval recall + share of answers with a correct citation. Output a single number. Put under `eval/` (new dir) + a `mnemex eval` CLI command or a standalone script. This is the graph the relaunch article needs.
+### Phase 1 — cheap credibility (do first; unblocks the relaunch) — ✅ DONE
+- [x] **Claim-level provenance.** `^[raw/books/<slug>/book.md:Lstart-Lend]` in templates + CLAUDE.md; `scripts/lint-citations.mjs` + `mnemex lint`.
+- [x] **Mini eval harness.** `eval/` — fixture + questions + run.mjs; upgraded to credibility-grade (nDCG@10/MAP/MRR, bootstrap CI, permutation, stratified buckets incl. cross-lingual + no-answer).
 
-### Phase 2 — retrieval quality (the real upgrade; the article's money graph)
-- [ ] **Contextual Retrieval.** At ingest, generate a 1–2 sentence contextual prefix per chunk and index the *prefixed* text in qmd. Keep multilingual (Qwen). Re-run the Phase-1 eval → produce a before/after recall delta.
-- Reference implementation to study: `claude-obsidian/scripts/contextual-prefix.py`.
+### Phase 2 — retrieval quality — mostly measured; little left to build
+- [ ] **Contextual breadcrumb (2b).** DESIGNED (`docs/methodology/contextual-retrieval-design.md`), not built. Language-matched breadcrumb at conversion time; re-run eval → arm B. Headroom expected small (qmd already carries title + heading hierarchy). Reference: `claude-obsidian/scripts/contextual-prefix.py`.
+- [x] **Reranking** — already delivered by qmd (qwen3-reranker); confirmed the dominant lever. Nothing to build.
+- [x] **Cross-lingual moat** — proven (RU→EN ≈83%), no build needed.
+- 🅿️ **Typed-graph retrieval** — parked R&D (eval-only, unproven; see Progress section). Not a phase deliverable.
 
-### Phase 3 — curation robustness
-- [ ] **Review queue.** Write candidate pages to a staging area; human approves before they land in `wiki/`. Directly fixes the "model silently halts/halucinates" failure mode. Reference: `llm-wiki-compiler/src/commands/review-*.ts`.
-- [ ] **Lint as code** (not model-only): broken wikilinks, orphan pages, duplicate concepts (via aliases registry), unflagged contradictions.
+### Phase 3 — curation robustness (NEXT UP)
+- [ ] **Lint as code** (highest-value, ~120 LOC): broken wikilinks, orphan pages, duplicate concepts. mnemex has **zero wikilink validation today** despite dense `[[...]]`. Add `scripts/lint-links.mjs` (fence-aware `[[...]]` extractor, `\p{L}`-safe) alongside `lint-citations.mjs`; wire into `mnemex lint`. Steal #10/#11 from the strategy doc.
+- [ ] **Review queue** (slice): verbatim-body staging → human approve/reject before pages land in `wiki/`. Reference: `llm-wiki-compiler/src/commands/review-*.ts`. Take the small staging+policy slice, not the full concurrent-lock machinery.
 
 ### Skip (low value for this project)
 - d3 web viewer (Obsidian already renders the graph), export formats (llms.txt/Marp/GraphML), multi-agent orchestration / hooks.
