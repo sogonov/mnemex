@@ -4,6 +4,7 @@ import { init } from "./init.js";
 import { doctor } from "./doctor.js";
 import { mcpInstall, mcpStatus } from "./mcp.js";
 import { setupSearch, reindex, search } from "./search.js";
+import { lint } from "./lint.js";
 
 const program = new Command();
 
@@ -54,5 +55,12 @@ program
   .argument("<query>", "What to search for")
   .description("Search your wiki from the terminal (wraps qmd query)")
   .action((query) => search(query));
+
+program
+  .command("lint")
+  .description("Check claim-level provenance citations across the wiki")
+  .option("--wiki <path>", "Wiki root path")
+  .option("--json", "Emit findings as JSON")
+  .action((opts) => lint(opts));
 
 program.parseAsync(process.argv);
