@@ -1,2 +1,5 @@
 # The built eval wiki is a large, regenerable artifact — keep it out of git.
 .wiki/
+
+# Per-run retrieval result dumps — regenerable; recorded numbers live in BASELINE.md.
+results-*.json

@@ -30,6 +30,28 @@ claim carries a line-level `^[raw:Lstart-Lend]` token; lint passes clean.
 Keyword-only finds ~⅜ of targets; multilingual vectors roughly double that;
 hybrid (BM25 + vector + rerank) nearly closes the gap. This is the graph.
 
+## Credibility-grade retrieval baseline — arm A (plain hybrid)
+
+`node eval/run-retrieval.mjs` (rank-aware metrics, stratified buckets, bootstrap CI,
+dev+holdout split). This is **arm A** of the Phase-2 ablation (plain qmd hybrid, no
+breadcrumb, no graph). Same corpus + the `mnemex-wiki` collection.
+
+| bucket | n | nDCG@10 | R@10 | note |
+|---|---|---|---|---|
+| exact/title | 3 | 100.0 | 100 | trivial |
+| single-hop | 9 | 100.0 | 100 | trivial |
+| **cross-source** | 4 | **64.3** | 75 | the weak spot → target of typed-graph expansion (arm C / 2c) |
+| **cross-lingual (RU→EN)** | 6 | **83.3** | 83.3 | **the moat**: Russian questions retrieve English source pages, 5/6 |
+| **OVERALL** | 22 | **89.0** | 90.9 | headline nDCG@10, 95% CI [76.7, 98.4] |
+
+- **no-answer control: 4/4 abstained** (borscht / kubernetes / quantum / neural-net → qmd
+  returns nothing, top score 0.00). The eval is built to catch failures, not hide them.
+- **Cross-lingual is the demonstrable win** competitors' English-default stacks cannot produce.
+  The one miss (`xl-control-ru`, "не в нашей власти" → Meditations) is an honest RU-phrasing gap —
+  a candidate for corpus-language HyDE / graph expansion.
+- **Arms B (contextual breadcrumb) and C (typed-graph expansion)** re-run this identical fixture;
+  the delta on the `cross-source` and `cross-lingual` buckets is the relaunch graph.
+
 ## The 2 misses (Phase 2 targets)
 
 Both are cross-domain queries needing **two** source pages, where only one was
@@ -45,5 +67,7 @@ retrieved — the case Contextual Retrieval is meant to fix:
 ```bash
 export QMD_EMBED_MODEL="hf:Qwen/Qwen3-Embedding-0.6B-GGUF/Qwen3-Embedding-0.6B-Q8_0.gguf"
 # corpus.md steps build eval/.wiki and register the mnemex-wiki qmd collection
-node eval/run.mjs            # or: pnpm eval
+node eval/run.mjs                                   # citation + recall (qmd bench)
+node eval/run-retrieval.mjs --label A-plain --out eval/results-A-plain.json  # arm A
+node eval/metrics.mjs --selftest && node eval/stats.mjs --selftest           # unit tests
 ```
