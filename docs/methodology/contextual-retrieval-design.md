@@ -29,6 +29,18 @@
 > the real cross-encoder union rerank; only the *method path* changes (`store.internal.rerank`,
 > not a fabricated public `QMDStore.rerank`). See the corrected Decision #2.
 
+> **⚠ First-measurement status (2026-07-02) — the graph tier is a HYPOTHESIS, not a result.**
+> A 4-arm ablation (A qmd hybrid · B rerank-seeds · C rerank-seeds+graph · D rerank-all;
+> `eval/run-retrieval-graph.mjs`, see `eval/BASELINE.md`) showed the typed-graph lift **does not
+> generalize** on the current corpus: on gold pairs with a hand-typed edge it added +20 pts
+> (circular — same author wrote edges and queries; p=0.25), but on **un-edged** pairs it added
+> **0.0**, and brute-force **arm D (rerank every page) beat arm C**. The corpus is only 5 pages
+> (k ≥ |corpus|), so this measures direction at best. The mechanism is built + unit-tested, but
+> the "leapfrog no competitor can copy" claim in §1/§4 is **unproven** — keep it out of any
+> external-facing material until a larger corpus + **independently-authored** edges/queries with
+> un-edged coverage isolate a real, significant B→C effect. The un-confounded demonstrated win in
+> this eval is the **cross-lingual moat** (arm A), not the graph.
+
 **Dossier key:** D1 contextual-retrieval · D2 GraphRAG · D3 query-understanding ·
 D4 multilingual · D5 eval-methodology · D6 qmd-capability-audit · D7 competitor-exploit-list ·
 D8 mnemex-substrate-advantage.

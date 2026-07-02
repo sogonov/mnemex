@@ -54,9 +54,11 @@ export function parseTypedLinks(text) {
     const h = line.match(/^#{2,}\s+(.*)$/);
     if (h) { edge = edgeFor(h[1]); continue; }
     if (!edge) continue;
-    for (const m of line.matchAll(/\[\[([^\]|#]+)(?:[|#][^\]]*)?\]\]/g)) {
-      out.push({ page: m[1].trim(), ...edge });
-    }
+    // Only the FIRST wikilink on a list-item line is the typed edge's target.
+    // A trailing inline "… See [[Other]]." is a reference, NOT a typed edge —
+    // counting it injected the synthesis page as a bogus weight-1.0 contrast.
+    const m = line.match(/\[\[([^\]|#]+)(?:[|#][^\]]*)?\]\]/);
+    if (m) out.push({ page: m[1].trim(), ...edge });
   }
   return out;
 }
@@ -77,11 +79,15 @@ export function expand(seedRel, root, { maxPerType = 4, index = null } = {}) {
   for (const l of links) {
     const target = idx.get(l.page);
     if (!target || target === seedRel) continue; // unresolved link or self
-    const seen = (byType.get(l.type) || 0);
-    if (seen >= maxPerType) continue;
-    byType.set(l.type, seen + 1);
     const prev = best.get(target);
-    if (!prev || l.weight > prev.weight) best.set(target, { target, edgeType: l.type, weight: l.weight, surface: l.surface });
+    if (prev) { // already admitted — update weight only, don't burn a cap slot
+      if (l.weight > prev.weight) best.set(target, { target, edgeType: l.type, weight: l.weight, surface: l.surface });
+      continue;
+    }
+    const seen = byType.get(l.type) || 0;
+    if (seen >= maxPerType) continue; // cap fan-out per edge type, counting only NEW targets
+    byType.set(l.type, seen + 1);
+    best.set(target, { target, edgeType: l.type, weight: l.weight, surface: l.surface });
   }
   return [...best.values()].sort((a, b) => b.weight - a.weight);
 }

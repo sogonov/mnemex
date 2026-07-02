@@ -52,30 +52,51 @@ breadcrumb, no graph). Same corpus + the `mnemex-wiki` collection.
 - **Arms B (contextual breadcrumb) and C (typed-graph expansion)** re-run this identical fixture;
   the delta on the `cross-source` and `cross-lingual` buckets is the relaunch graph.
 
-## Arm C — typed-graph expansion + cross-encoder union rerank
+## Arm C — typed-graph expansion (4-arm ablation; the honest result)
 
-`node eval/run-retrieval-graph.mjs` (arm A vs arm C, **paired**, one qmd process). Arm C:
-seeds = arm A hybrid → walk the typed wikilink edges (`graph-expand.mjs`: Contrasted-with /
-Contradicts / See-also, edge-weighted) → union(seeds, neighbors) → `store.internal.rerank(query, union)`
-(the cross-encoder over the union — the guardrail, verified reachable via the qmd SDK).
+An adversarial audit killed the first, naive "arm A vs arm C" measurement: arm C both added
+graph neighbors **and** switched qmd's RRF-blend ordering for a pure cross-encoder pass (applied
+only when the graph fired) — so its "+14 pt" lift was **confounded** by the extra rerank, and the
+held-out queries were **circular** (the same author wrote both the edges and the queries).
+`node eval/run-retrieval-graph.mjs` now runs a 4-arm ablation to isolate the graph:
 
-| bucket | arm A nDCG@10 | arm C nDCG@10 | R@10 A→C |
-|---|---|---|---|
-| exact/title, single-hop | 100.0 | 100.0 | no regression |
-| **cross-source** (all 9) | 46.5 | **64.7 ↑** | **50.0 → 77.8** |
-| cross-lingual | 83.3 | 83.3 | unchanged (no graph edges walked) |
-| **held-out cross-source** (n=5) | 32.3 | **46.3** | **Δ +14.1 pts** |
-| no-answer | — | 4/4 abstained | arm C safe (no seeds → no expansion) |
+- **A** = qmd hybrid order (`store.search`) — the product baseline.
+- **B** = pure cross-encoder rerank of the **seeds only** (no graph).
+- **C** = pure cross-encoder rerank of **seeds ∪ graph-neighbors** (B + graph).
+- **D** = pure cross-encoder rerank of **every page** (ceiling: "just consider all").
 
-**Honest read.** The leapfrog **mechanism works**: graph expansion pulls the missed second
-source (via `Contrasted-with`/`See-also` edges) into the union, and the cross-encoder ranks it
-up — lifting cross-source Recall@10 from **50% → 77.8%**. **But at n=5 held-out the +14.1-pt nDCG
-lift is NOT statistically significant** (paired permutation *p* = 0.25; 95% CIs
-A[7.7, 56.8] vs C[12.5, 80.2] overlap). This is the design's own caveat: significance needs
-**~20 held-out cross-source queries**, not 5. Established: the mechanism, the direction, and
-**no regression** on easy buckets + preserved no-answer abstention. Pending: a held-out set
-large enough to claim significance. I authored both the edges and the held-out queries, so an
-independent check of circularity is warranted before quoting this as a headline.
+`A→B` is the ranking-function switch; **`B→C` is the graph's true marginal effect**; `C vs D`
+asks whether the graph beats brute-force "rerank everything."
+
+| bucket | n | A | B | C | D |
+|---|---|---|---|---|---|
+| exact/title, single-hop | 12 | 100.0 | 100.0 | 100.0 | 100.0 |
+| cross-source | 11 | 49.2 | 52.0 | 66.8 | **80.5** |
+| cross-lingual (RU→EN) | 6 | 83.3 | 83.3 | 83.3 | **100.0** |
+
+Held-out cross-source, split by whether a hand-typed edge actually bridges the gold pair:
+
+| held-out slice | n | B (rerank seeds) | C (+graph) | Δ (B→C) | permutation p |
+|---|---|---|---|---|---|
+| **edged** (circular by construction) | 5 | 32.3 | 52.5 | +20.2 | 0.25 |
+| **un-edged** (generalization test) | 2 | 61.3 | 61.3 | **0.0** | 1.0 |
+
+**Honest read — the typed-graph leapfrog is NOT demonstrated.**
+- **Zero generalization:** on gold pairs I did *not* hand-connect, the graph adds **nothing**
+  (un-edged Δ = 0.0). It "helps" only on the exact pairs whose edges I wrote — i.e. it recovers
+  what was planted, which is circular.
+- **Beaten by brute force:** arm **D (rerank-all-5-pages) = 80.5 > C = 66.8** on cross-source, and
+  D fixes the cross-lingual miss too (100 vs 83.3). On a 5-page corpus, "consider every page and
+  rerank" dominates graph expansion — the corpus is far too small (k=10 ≥ |corpus|=5) for a graph
+  to matter or for recall to be meaningful.
+- **What *is* real and un-confounded:** the **cross-lingual moat** (arm A, RU→EN 83%, 5/6) and the
+  **no-answer control** (4/4 abstained). Those need no graph.
+
+**Status:** the graph plumbing is built + unit-tested (`graph-expand.mjs --selftest`) and the
+cross-encoder-over-union path is verified reachable — but **do not put a typed-graph retrieval
+lift in any external claim.** A real test needs (1) a much larger corpus so arm D isn't a ceiling,
+(2) **independently-authored** edges and queries, and (3) coverage of un-edged pairs. That is the
+next eval increment, not a finished result.
 
 ## The 2 misses (Phase 2 targets)
 
