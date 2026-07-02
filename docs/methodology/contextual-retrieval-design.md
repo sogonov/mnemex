@@ -13,6 +13,22 @@
 > (`eval/BASELINE.md`, `apps/wiki-template/CLAUDE.md`, `apps/wiki-template/scripts/ingest-book.sh`).
 > Nothing here rebuilds what `qmd` owns.
 
+> **⚠ Correction (verified against the installed qmd SDK + context7 docs + a live test, 2026-07-02).**
+> The design below names a public `QMDStore.rerank(query, docs)` for reranking an
+> externally-assembled candidate union (Tier 4). **No such method exists on the *public*
+> `QMDStore` interface** and context7's qmd docs describe reranking only *inside* the `query`
+> pipeline (top-30 of qmd's own retrieval). **But the capability is real:** the internal `Store`
+> (reachable via `createStore().internal`) exposes a **typed** method
+> `rerank(query, {file,text}[], model?, intent?) → {file,score}[]` (`dist/store.d.ts`).
+> A live test (`createStore({dbPath: ~/.cache/qmd/index.sqlite}).internal.rerank(...)`) ranked
+> *"feared or loved" → The Prince 0.73 > Art of War 0.50 > borscht recipe 0.50* — **correct.**
+> **Consequence:** Tier-4 union cross-encoder rerank **is feasible** via `store.internal.rerank`
+> — an *internal* (not-in-README) but typed, working API. Ship it behind a runtime feature-guard
+> (`typeof store.internal?.rerank === 'function'`) with **deterministic union ordering**
+> (edge-weight × seed rank) as the fallback if a future qmd drops the internal method. So 2c keeps
+> the real cross-encoder union rerank; only the *method path* changes (`store.internal.rerank`,
+> not a fabricated public `QMDStore.rerank`). See the corrected Decision #2.
+
 **Dossier key:** D1 contextual-retrieval · D2 GraphRAG · D3 query-understanding ·
 D4 multilingual · D5 eval-methodology · D6 qmd-capability-audit · D7 competitor-exploit-list ·
 D8 mnemex-substrate-advantage.
@@ -331,7 +347,7 @@ Genuine forks — recommendation each, do not let me silently pick.
 | # | Decision | Recommendation |
 |---|---|---|
 | 1 | **Breadcrumb mechanism:** inject at conversion time into `book.md` (native, line-stable because tokens are computed against the breadcrumbed file, but writes *derived* text into `raw/`) **vs** a gitignored `raw-ctx/` shadow collection (keeps `raw/` pristine, heavier ~150–250 LOC + invalidation) | **Breadcrumb-at-conversion.** It's the free, multilingual-safe win and provenance-consistent since it runs *before* any claim tokens exist. Breadcrumbs are built from the book's own headings (its own words), so `raw/` stays faithful. Reserve the shadow collection for the Haiku-situate fallback on heading-less scanned PDFs. |
-| 2 | **Graph walk:** external script over qmd MCP/CLI results **vs** in-process `createStore` SDK | **Prototype Tier 3 over MCP, but ship Tiers 3–4 on `createStore`.** MCP can pull neighbors, but its `query`/`multi_get` run their own retrieval and expose **no way to rerank an externally-assembled union** — only `QMDStore.rerank()` (SDK) does. Without the SDK, Tier 4 is not a cross-encoder and the graph walk degenerates into neighbor-dumping. So the SDK is a **correctness** requirement for union-rerank, not merely a latency optimization **[D6]**. |
+| 2 | **Graph walk:** external script over qmd MCP/CLI results **vs** in-process `createStore` SDK | **Prototype Tier 3 over MCP, but ship Tiers 3–4 on `createStore`.** MCP `query`/`multi_get` run their own retrieval and expose **no way to rerank an externally-assembled union**. The cross-encoder over the union is reachable via **`store.internal.rerank(query, {file,text}[])`** — an *internal*, typed, **empirically-verified** method (not the fabricated public `QMDStore.rerank`; see the ⚠ correction). Guard it with `typeof store.internal?.rerank === 'function'` and fall back to deterministic union ordering. So the SDK is a **correctness** requirement for union-rerank; the only caveat is depending on an internal (non-README) API, mitigated by the feature-guard **[D6]**. |
 | 3 | **Contextualize raw only, or wiki too?** | **Raw only.** Wiki pages are self-contextual. Contextualize wiki *tail* chunks later only if the eval shows long-page tails miss after qmd's chunking. |
 | 4 | **LLM-situate tier now, or synthetic-breadcrumb v1?** | **Synthetic v1.** Measure the free-breadcrumb delta first (arm B). Wire the Haiku `--context` tier only if that delta is small **and** you have heading-less PDFs where breadcrumbs are unavailable **[D1]**. |
 | 5 | **Eval corpus:** English-only, or add a Russian source page? | **Add one Russian public-domain source** + grow to ~60 queries, so the RU bucket exercises RU→RU and EN→RU, not just RU-query→EN-doc. Strongest, most defensible "we beat them" axis **[D4][D5]**. |
