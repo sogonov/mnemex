@@ -121,6 +121,48 @@ claim, honestly scoped: *"walking the hand-typed graph gives a significant recal
 retrieval on cross-source questions (p<0.01, independent eval); at small corpus sizes a full
 rerank still matches it, so the graph's efficiency edge is pending a larger library."*
 
+## Brain B+ retest — real 615-page corpus (the honest, sobering result)
+
+The 17-page result above left one question: does the graph beat brute force once the corpus is
+big enough that rerank-all is infeasible? Tested on the owner's **real `brain-wiki` (615 pages,
+his actual software/leadership domain, dense hand-typed concept graph)** with **48 cross-concept
+queries authored by 6 agents** reading source summaries + concept names, **blind to the
+concept-concept edges** (fixture `fixture-brain.json`). Arm D = rerank a broad top-50 retrieval
+(rerank-all is infeasible at 615 pages). 43/48 queries scored before the long SDK run was reaped.
+
+| arm | nDCG@10 (n=43) |
+|---|---|
+| A qmd hybrid | 73.0 |
+| B rerank(seeds) | 79.5 |
+| C rerank(seeds+graph) | **82.1** |
+| D rerank(broad top-50) | 80.4 |
+
+| comparison | Δ | permutation p | verdict |
+|---|---|---|---|
+| **A→B** (the rerank switch) | +6.5 | 0.07 | biggest lever — and it's **not the graph** |
+| **B→C** (graph over rerank-seeds) | +2.6 | 0.14 | **not significant** |
+| **C→D** (graph over broad-pool rerank) | +1.8 | 0.29 | **not significant** |
+
+edged n=33 B→C +1.2 · un-edged n=10 B→C +7.2 (95% CIs C[75.8, 87.9] vs D[73.4, 87.0] overlap heavily).
+
+**Honest verdict — B+ did NOT deliver a significant graph win.**
+- **Directional crossover is real:** at 615 pages C (82.1) is on top, edging D (80.4) — reversing
+  the 17-page D>C. Encouraging as a point estimate.
+- **But nothing is significant:** C-vs-D p=0.29, C-vs-B p=0.14. At n=43 with wide, overlapping CIs
+  we **cannot** claim the graph beats brute-force or even rerank-seeds. The dominant, most reliable
+  lever is the **cross-encoder rerank itself** (A→B, +6.5), which qmd already does — not the graph.
+- **The edged/un-edged flip is informative:** on the brain, directly-linked concepts are so similar
+  that seeds already retrieve both (edged Δ only +1.2); the graph helps more when the missing gold
+  is reachable via a *seed's* edge, not gold-gold adjacency (un-edged +7.2). The mechanism is real
+  but weak and setup-dependent.
+
+**Bottom line across all three corpora (5-page → 17-page → 615-page):** the typed-graph tier is a
+**promising but unproven** add-on — directional at scale, never robustly significant. **Reranking
+is the real retrieval lever, and mnemex already delegates it to qmd.** The clean, un-confounded,
+demonstrable wins remain the **cross-lingual moat** and **provenance/citation** — not the graph.
+Resolving the graph would need hundreds of queries (to shrink the CIs) on a large corpus; it is
+not a relaunch headline today.
+
 ## Reproduce
 
 ```bash

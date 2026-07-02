@@ -43,6 +43,16 @@
 > cross-source questions (p<0.01, independent eval)"; NOT yet "beats reranking the whole corpus."
 > The earlier +20 pt / p=0.25 self-authored number is superseded. The cross-lingual moat (arm A)
 > remains the other un-confounded win.
+>
+> **Update 2 — the 615-page brain retest (sobering).** Re-run at real scale on the owner's
+> `brain-wiki` (615 pages, 48 independent cross-concept queries; arm D = broad top-50 rerank):
+> C (graph) 82.1 is directionally on top and **crosses over D** (80.4) — reversing the 17-page
+> D>C — BUT **no comparison is significant** (C-vs-D p=0.29, C-vs-B p=0.14, n=43). The biggest,
+> most reliable lever is the plain cross-encoder rerank (A→B +6.5), which qmd already does — not
+> the graph. **Net across 5→17→615 pages: the typed-graph tier is promising-but-unproven —
+> directional at scale, never robustly significant.** Do not headline it. Resolving it needs
+> hundreds of queries on a large corpus. Reranking (delegated to qmd), the cross-lingual moat, and
+> provenance are the demonstrable wins; the graph stays an R&D bet, honestly scoped.
 
 **Dossier key:** D1 contextual-retrieval · D2 GraphRAG · D3 query-understanding ·
 D4 multilingual · D5 eval-methodology · D6 qmd-capability-audit · D7 competitor-exploit-list ·

@@ -1,0 +1,534 @@
+{
+  "description": "Brain B+ retrieval fixture. 48→valid cross-page queries over the real 615-page brain, authored by 6 agents reading source summaries + concept names, BLIND to the concept-concept typed edges. For run-retrieval-graph.mjs --collection brain-wiki.",
+  "version": 1,
+  "queries": [
+    {
+      "id": "bq-01-en",
+      "q": "We're running a Dynamo-style store with tunable read/write quorums. If I set R and W so they overlap, do I actually get strong reads, or is this still just eventual consistency with extra steps? Trying to understand what the quorum overlap really buys me.",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Quorum-Based-Replication.md",
+        "concepts/Eventual-Consistency.md"
+      ]
+    },
+    {
+      "id": "bq-02-en",
+      "q": "If we require every client to always read the most recent write across all replicas, what does that cost us when the network splits and a datacenter link drops? Is there a clean way to reason about giving up availability there?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Linearizability.md",
+        "concepts/CAP-Theorem.md"
+      ]
+    },
+    {
+      "id": "bq-03-en",
+      "q": "With a write-optimized engine that only appends to immutable files and buffers in memory, how does anything survive a crash before the memtable is flushed? Walk me through what actually guarantees durability here.",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/LSM-Tree-Internals.md",
+        "concepts/WAL-and-Recovery.md"
+      ]
+    },
+    {
+      "id": "bq-04-en",
+      "q": "In our event-time pipeline, how do I decide when a windowed aggregate is 'done' and safe to emit, while still handling records that show up late? What mechanism tells me completeness versus what mechanism decides when to actually fire output?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Watermarks.md",
+        "concepts/Streaming-Triggers.md"
+      ]
+    },
+    {
+      "id": "bq-05-en",
+      "q": "Our stream processor sometimes replays records after a failure. How do I make sure a downstream side effect like a database upsert or an external API call doesn't get double-applied? What has to be true end-to-end for the effect to land only once?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Exactly-Once-Streaming.md",
+        "concepts/Idempotent-Pipeline-Design.md"
+      ]
+    },
+    {
+      "id": "bq-06-en",
+      "q": "I want to turn our Postgres change feed into the source of truth for the whole system instead of just syncing tables. What's the difference between streaming row-level changes off the WAL and treating the application's domain events as the append-only log everything else is derived from?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Change-Data-Capture-CDC.md",
+        "concepts/Event-Sourcing.md"
+      ]
+    },
+    {
+      "id": "bq-07-ru",
+      "q": "У нас сейчас два параллельных конвейера — батч для точных пересчётов и стрим для быстрых результатов, и их приходится сводить вместе. Есть ли смысл выкинуть батч-ветку и всё гонять через один потоковый пайплайн с реплеем из лога? Какие компромиссы?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "concepts/Lambda-Architecture.md",
+        "concepts/Kappa-Architecture.md"
+      ]
+    },
+    {
+      "id": "bq-08-ru",
+      "q": "В аналитическом хранилище нужно отвечать на вопрос 'какой сегмент был у клиента на момент заказа, а не сегодня'. Как правильно хранить историю изменений измерения и почему для этого нельзя использовать бизнес-ключ из операционной базы в качестве первичного?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "concepts/Slowly-Changing-Dimensions.md",
+        "concepts/Surrogate-Keys.md"
+      ]
+    },
+    {
+      "id": "bq-09-en",
+      "q": "When I'm designing a class, is it better to hide more implementation behind a simpler interface, and how does that idea of concealing internals connect to whether a module is worth its interface cost?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Deep-vs-Shallow-Modules.md",
+        "concepts/Information-Hiding.md"
+      ]
+    },
+    {
+      "id": "bq-10-en",
+      "q": "Our codebase keeps getting harder to change even though every ticket ships fast. How does a quick-fix, just-make-it-work coding attitude actually cause that slow buildup of things that make the system hard to understand and modify?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Strategic-vs-Tactical-Programming.md",
+        "concepts/Complexity-Software.md"
+      ]
+    },
+    {
+      "id": "bq-11-en",
+      "q": "In Clean Architecture the rule is that source dependencies only point inward toward business rules. What's the actual OO mechanism that lets high-level policy not depend on low-level details, and how does it make that inward-pointing rule physically possible?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Dependency-Rule.md",
+        "concepts/Dependency-Inversion-Principle.md"
+      ]
+    },
+    {
+      "id": "bq-12-en",
+      "q": "We're integrating with a legacy billing system whose model is a mess. How do I keep my own domain model clean when talking to it, and what's the relationship between the boundary I draw around my model and the translation layer I put at its edge?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Bounded-Context.md",
+        "concepts/Anti-Corruption-Layer.md"
+      ]
+    },
+    {
+      "id": "bq-13-en",
+      "q": "For calls to a flaky downstream service, how do a component that stops calling after repeated failures and a hard limit on how long any single call may wait work together, and why is one not enough without the other?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Circuit-Breaker-Pattern.md",
+        "concepts/Timeout-Pattern.md"
+      ]
+    },
+    {
+      "id": "bq-14-en",
+      "q": "When a long method starts triggering my 'this is getting smelly' instinct, which specific refactoring move is the first-line response, and how do the warning signs map to that particular extraction?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Code-Smells.md",
+        "concepts/Extract-Function.md"
+      ]
+    },
+    {
+      "id": "bq-15-ru",
+      "q": "Прежде чем добавлять новую фичу в запутанный участок кода, Фаулер советует сначала привести его в порядок. Как этот 'сначала расчисти, потом строй' подход соотносится с правилом никогда не менять поведение и структуру одновременно?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "concepts/Preparatory-Refactoring.md",
+        "concepts/Two-Hats-Discipline.md"
+      ]
+    },
+    {
+      "id": "bq-16-ru",
+      "q": "Отказ одного медленного сервиса у нас утащил за собой половину системы. Как разделение ресурсов на изолированные отсеки помогает остановить такое лавинообразное распространение отказа, и в чём тут связь между причиной и защитой?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "concepts/Bulkhead-Pattern.md",
+        "concepts/Cascading-Failures.md"
+      ]
+    },
+    {
+      "id": "bq-17-en",
+      "q": "We keep fighting over whether to ship fast or keep things stable. How does setting an explicit reliability target with a spend-it-down allowance actually settle that argument instead of it being a political tug of war?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Error-Budget.md",
+        "concepts/Throughput-vs-Stability-False-Tradeoff.md"
+      ]
+    },
+    {
+      "id": "bq-18-en",
+      "q": "Our commit-to-production time is measured in days and every release is a manual event. What's the actual automated machine we should build to get that down to minutes, and why is that number the single best signal that we succeeded?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Deployment-Pipeline.md",
+        "concepts/Lead-Time-for-Changes.md"
+      ]
+    },
+    {
+      "id": "bq-19-en",
+      "q": "I'm the only person who carries the pager for our service. Beyond being tiring, why is a one-person rotation a structural risk to the business, and what's the minimum staffing that makes it sustainable?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/On-Call-Rotation-Design.md",
+        "concepts/Bus-Factor.md"
+      ]
+    },
+    {
+      "id": "bq-20-en",
+      "q": "One overloaded service started dragging down everything downstream until the whole system was unavailable. What failure dynamic makes an overload spread like that, and which code-level pattern stops one struggling dependency from taking the caller down with it?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Cascading-Failures.md",
+        "concepts/Circuit-Breaker-Pattern.md"
+      ]
+    },
+    {
+      "id": "bq-21-en",
+      "q": "When something breaks in prod our recovery is chaotic and slow because nobody knows who's running the response. What roles and command structure should we put in place during an incident, and how does that directly shorten how long we're down?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Incident-Response-Structure.md",
+        "concepts/MTTR-Mean-Time-To-Restore.md"
+      ]
+    },
+    {
+      "id": "bq-22-en",
+      "q": "Leadership wants every change routed through a formal approval board before it ships. What does the evidence say that does to how often we can actually release, and is that ceremony even buying us the safety it promises?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Change-Management-CAB.md",
+        "concepts/Deployment-Frequency.md"
+      ]
+    },
+    {
+      "id": "bq-23-ru",
+      "q": "После каждого инцидента у нас начинается поиск виноватого, и в итоге люди просто скрывают детали. Как правильно проводить разбор без обвинений и как это вообще связано с типом культуры, который делает организацию обучающейся, а не защищающейся?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "concepts/Blameless-Postmortem.md",
+        "concepts/Culture-of-Causality.md"
+      ]
+    },
+    {
+      "id": "bq-24-ru",
+      "q": "Моя неделя забита ручной повторяющейся операционкой, которая не оставляет ни минуты на нормальную инженерную работу. Как формально отличить эту рутину, которую надо автоматизировать, от той работы, что пожирает планы команды, и почему это одно и то же зло под разными именами?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "concepts/Eliminating-Toil.md",
+        "concepts/Unplanned-Work-Crowds-Out-Planned.md"
+      ]
+    },
+    {
+      "id": "bq-25-en",
+      "q": "I'm a senior engineer weighing whether to go into management or stay hands-on. If I don't take the manager role, what does the senior individual-contributor path actually look like day to day, and how do I decide between the two?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Tech-Lead-vs-Manager-Fork.md",
+        "concepts/Staff-Engineer.md"
+      ]
+    },
+    {
+      "id": "bq-26-en",
+      "q": "Amazon started with small autonomous teams owning a service and later moved to naming one owner per initiative. How do those two org models relate, and why did they end up keeping the second one?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Two-Pizza-Teams.md",
+        "concepts/Single-Threaded-Leader.md"
+      ]
+    },
+    {
+      "id": "bq-27-en",
+      "q": "As a staff-level engineer with no direct reports, how do I actually grow the people around me and get things to happen when I have no formal authority over anyone?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Sponsorship-vs-Mentorship.md",
+        "concepts/Influence-Without-Authority.md"
+      ]
+    },
+    {
+      "id": "bq-28-en",
+      "q": "Now that I manage other managers, my old weekly check-ins don't surface real problems anymore. How should my recurring conversations change to actually see what's happening two levels down?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/One-on-Ones.md",
+        "concepts/Skip-Level-Meetings.md"
+      ]
+    },
+    {
+      "id": "bq-29-en",
+      "q": "We keep making rushed, gut-feel hires under deadline pressure. What does a disciplined interview process look like, and what specific mechanism can stop urgency and groupthink from lowering the bar?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Hiring-Engineers.md",
+        "concepts/Bar-Raiser-Interview-Process.md"
+      ]
+    },
+    {
+      "id": "bq-30-en",
+      "q": "My dashboards are all totals like MRR and deploy counts, but they don't tell me what to do differently. How do I pick leading, controllable measures for both my product and my delivery pipeline instead of lagging vanity numbers?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Input-vs-Output-Metrics.md",
+        "concepts/DORA-Four-Key-Metrics.md"
+      ]
+    },
+    {
+      "id": "bq-31-ru",
+      "q": "Мне нужно вынести крупное решение на ревью руководству. Как правильно упаковать аргументацию в письменный документ и как выстроить сам разговор с executive-уровнем, чтобы решение прошло?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "concepts/Six-Page-Narrative-Memos.md",
+        "concepts/Working-With-Executives.md"
+      ]
+    },
+    {
+      "id": "bq-32-ru",
+      "q": "От меня хотят, чтобы я написал техническую стратегию и заодно двух-трёхлетнее видение для команды. Чем эти два документа отличаются по горизонту и содержанию, и как одно вырастает из другого?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "concepts/Technical-Strategy.md",
+        "concepts/Engineering-Vision.md"
+      ]
+    },
+    {
+      "id": "bq-33-en",
+      "q": "We're about to build our first version and the team keeps arguing about whether an MVP means shipping a real but stripped-down product to paying users, or throwing together something cheap just to test the idea before we write production code. How should we think about the difference?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/MVP-Minimum-Viable-Product.md",
+        "concepts/Product-Discovery.md"
+      ]
+    },
+    {
+      "id": "bq-34-en",
+      "q": "Once we've mapped out all the customer needs and pains for our target outcome, how do we decide which one to chase and then figure out what's actually risky enough about our chosen solution that we should test it before building?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Opportunity-Solution-Tree.md",
+        "concepts/Assumption-Mapping.md"
+      ]
+    },
+    {
+      "id": "bq-35-en",
+      "q": "Our signups and total users keep climbing but I have a nagging feeling the product isn't really working. How do I tell from the numbers whether we should keep pushing on this idea or make a fundamental change in direction?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Vanity-vs-Actionable-Metrics.md",
+        "concepts/Pivot-vs-Persevere.md"
+      ]
+    },
+    {
+      "id": "bq-36-en",
+      "q": "We're a small startup going after a market with a big entrenched incumbent. What structural advantages can actually protect us long term — is it better to lock customers in so leaving hurts, or to pick a business model the incumbent won't copy because it would cannibalize them?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Counter-Positioning.md",
+        "concepts/Switching-Costs.md"
+      ]
+    },
+    {
+      "id": "bq-37-en",
+      "q": "My leadership thinks we're already 'agile' but we still just execute a prioritized feature list handed down from above. What actually separates a genuinely empowered team from a feature factory, and why does measuring ourselves on features shipped keep us stuck?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Product-vs-Feature-Team.md",
+        "concepts/Outcome-vs-Output.md"
+      ]
+    },
+    {
+      "id": "bq-38-en",
+      "q": "If we design our product to be genuinely habit-forming with triggers and variable rewards, does that actually prove customers find it valuable, or are those separate things I need to validate independently?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Hook-Model.md",
+        "concepts/Four-Product-Risks.md"
+      ]
+    },
+    {
+      "id": "bq-39-ru",
+      "q": "Хочу наконец начать разговаривать с пользователями каждую неделю, но боюсь, что скачусь в вопросы вроде «а вы бы этим пользовались?». Как выстроить устойчивый еженедельный ритм интервью и как правильно формулировать вопросы, чтобы вытаскивать реальное поведение, а не выдуманные ответы?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "concepts/Weekly-Customer-Interview-Cadence.md",
+        "concepts/Story-Based-Customer-Interviews.md"
+      ]
+    },
+    {
+      "id": "bq-40-ru",
+      "q": "Запускаю сайд-проект в одиночку и хочу выйти на стабильную подписочную выручку. Насколько важно с самого начала бить в узкий сегмент рынка, и как это связано с экономикой бутстрап-SaaS без внешних инвестиций?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "concepts/Bootstrapped-SaaS.md",
+        "concepts/Niche-Down.md"
+      ]
+    },
+    {
+      "id": "bq-41-en",
+      "q": "We're breaking our monolith into services partly so my team can ship without waiting on other teams or a central approval. How does the architectural decoupling actually connect to giving a squad real ownership of outcomes rather than just a feature backlog?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Loosely-Coupled-Architecture.md",
+        "concepts/Empowered-Product-Team.md"
+      ]
+    },
+    {
+      "id": "bq-42-en",
+      "q": "When we run an incident review, people quietly judge the on-call engineer as reckless once they know the outage happened. How do I keep the retro honest given that knowing the result warps everyone's sense of what was obvious beforehand?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Hindsight-Bias.md",
+        "concepts/Blameless-Postmortem.md"
+      ]
+    },
+    {
+      "id": "bq-43-en",
+      "q": "As a staff engineer with no formal authority over other teams, I need to get people to adopt a shared logging standard. What conversational techniques help me pull others toward a decision instead of pushing, when I can't just mandate it?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Influence-Without-Authority.md",
+        "concepts/Calibrated-Questions.md"
+      ]
+    },
+    {
+      "id": "bq-44-en",
+      "q": "I keep telling my team that shipping tiny changes every day beats big quarterly releases, and it feels a lot like the '1% better' idea from personal habits. Are those actually the same principle, and how do the compounding and the batch-size arguments reinforce each other?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Aggregation-of-Marginal-Gains.md",
+        "concepts/Small-Batches-Lean.md"
+      ]
+    },
+    {
+      "id": "bq-45-en",
+      "q": "A dev who had a stellar quarter did merely average the next one, and a struggler bounced back after a stern review. Before I write these up as coaching wins and losses, how should I think about performance naturally swinging back toward average?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "concepts/Regression-to-the-Mean.md",
+        "concepts/Performance-Reviews.md"
+      ]
+    },
+    {
+      "id": "bq-46-ru",
+      "q": "Мы месяцами пилили фичу, в которую были уверены, а пользователям она не зашла. Как связать привычку мозга достраивать убедительную картину из того, что перед глазами, с тем, что продуктовые команды проверяют идею по нескольким видам риска до разработки?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "concepts/WYSIATI.md",
+        "concepts/Four-Product-Risks.md"
+      ]
+    },
+    {
+      "id": "bq-47-ru",
+      "q": "В коде мы ставим circuit breaker и таймауты, чтобы один падающий сервис не утянул всю систему. Мой знакомый инвестор говорит, что это ровно его 'запас прочности'. Это правда одна и та же идея, и как перенос из мира денег в мир инженерии помогает решать, сколько резерва закладывать?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "concepts/Circuit-Breaker-Pattern.md",
+        "concepts/Margin-of-Safety.md"
+      ]
+    },
+    {
+      "id": "bq-48-ru",
+      "q": "Начальник требует назвать точную дату релиза, а мои оценки почти всегда оптимистичны. Как объяснить систематическую недооценку сроков и почему опора на реальное измеренное время от коммита до прода надёжнее, чем интуитивная оценка?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "concepts/Planning-Fallacy.md",
+        "concepts/Lead-Time-for-Changes.md"
+      ]
+    }
+  ]
+}

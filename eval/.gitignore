@@ -8,3 +8,4 @@
 
 # Per-run retrieval result dumps — regenerable; recorded numbers live in BASELINE.md.
 results-*.json
+results-*.jsonl
