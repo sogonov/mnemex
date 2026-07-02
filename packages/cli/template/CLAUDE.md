@@ -159,19 +159,30 @@ A single ingest typically touches **10–15 wiki pages**. That's correct — it'
 
 When the owner asks for lint, or proactively after every ~20 ingests:
 
-**Code lint (deterministic — run the script):** `node scripts/lint-citations.mjs` (or `mnemex lint`)
-checks claim-level provenance across `wiki/sources/` and `wiki/syntheses/`: claims with **no**
-token, **malformed** tokens, and tokens whose raw file is missing or line range is out of bounds.
-It exits non-zero when it finds problems. Run it at the end of every ingest and fix what it reports.
+**Code lint (deterministic — run the scripts, or `mnemex lint` which runs both):**
 
-**Judgment lint (you do this by reading):**
+- `scripts/lint-citations.mjs` — claim-level provenance across `wiki/sources/` and `wiki/syntheses/`:
+  claims with **no** token, **malformed** tokens, and tokens whose raw file is missing or line range
+  is out of bounds.
+- `scripts/lint-links.mjs` — wikilink integrity across all of `wiki/`: **broken** `[[links]]`
+  (resolve to no page, by basename or alias), **duplicate** names (one basename/alias owned by 2+
+  pages — an ambiguous `[[link]]` target, the "same concept under two names" trap), and **orphan**
+  pages (no inbound link from another page). Fence-aware, alias-aware, Unicode-safe (Cyrillic titles
+  resolve). Orphans are advisory (exit 0); `--strict` fails on them too.
+
+`mnemex lint` exits non-zero on any hard finding (broken/duplicate; orphans only under `--strict`).
+Run it at the end of every ingest and fix what it reports.
+
+**Judgment lint (you do this by reading — the fuzzy calls a script can't make):**
 
 - Find **contradictions** between pages that aren't already flagged.
 - Find **stale claims** (a `source: 1` page where the only source has been superseded by newer reading).
-- Find **orphan pages** — no inbound wikilinks. Either delete or integrate.
+- Find **near-duplicate concepts** — pages with *similar* (not byte-identical) titles or overlapping
+  meaning that `lint-links` can't catch. Propose merges. (Exact basename/alias collisions are already
+  caught by `lint-links`; this is the semantic layer above it.)
 - Find **implicit concepts** — terms used on 3+ pages with no concept page of their own.
-- Find **broken wikilinks**.
-- Find **duplicate concepts** — pages with similar titles or overlapping aliases. Propose merges.
+- For each **orphan** `lint-links` flags, decide per page: delete, integrate, or accept (a fresh stub
+  legitimately has no inbound links yet).
 - Report findings as a list. Don't fix without owner approval.
 
 ---

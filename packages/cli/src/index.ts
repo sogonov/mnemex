@@ -58,9 +58,10 @@ program
 
 program
   .command("lint")
-  .description("Check claim-level provenance citations across the wiki")
+  .description("Check wiki health: claim-level provenance + wikilink integrity")
   .option("--wiki <path>", "Wiki root path")
   .option("--json", "Emit findings as JSON")
+  .option("--strict", "Fail on orphan pages too (advisory by default)")
   .action((opts) => lint(opts));
 
 program.parseAsync(process.argv);

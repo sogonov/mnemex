@@ -77,8 +77,19 @@ Ruthless scoping is the point: "merge everything" kills solo projects. Ship each
 - [x] **Cross-lingual moat** — proven (RU→EN ≈83%), no build needed.
 - 🅿️ **Typed-graph retrieval** — parked R&D (eval-only, unproven; see Progress section). Not a phase deliverable.
 
-### Phase 3 — curation robustness (NEXT UP)
-- [ ] **Lint as code** (highest-value, ~120 LOC): broken wikilinks, orphan pages, duplicate concepts. mnemex has **zero wikilink validation today** despite dense `[[...]]`. Add `scripts/lint-links.mjs` (fence-aware `[[...]]` extractor, `\p{L}`-safe) alongside `lint-citations.mjs`; wire into `mnemex lint`. Steal #10/#11 from the strategy doc.
+> Update 2026-07-02 (session 2): Phase 3a **Lint as code** shipped (details below). Next: review-queue slice.
+
+### Phase 3 — curation robustness (IN PROGRESS)
+- [x] **Lint as code** — `scripts/lint-links.mjs` (~230 LOC w/ selftest): **BROKEN** `[[links]]`
+  (unresolved by basename or alias), **DUPLICATE** names (one basename/alias owned by 2+ pages — the
+  ambiguous-`[[link]]` / "same concept, two names" trap), **ORPHAN** pages (no inbound link; advisory,
+  `--strict` to fail). Fence-aware + inline-code-aware `[[...]]` extractor, alias-aware resolution,
+  `\p{L}`/Unicode-safe (Cyrillic titles resolve), skips file-path/media targets (those are provenance
+  or embeds, not page edges). Wired into `mnemex lint` (runs both citations + links, `--strict` flag);
+  `init` bundles it (verified on a fresh wiki). Pure core unit-tested via `--selftest`. On the eval
+  corpus it caught a real ambiguous alias (`Essays` shared by Bacon/Emerson/Montaigne). CLAUDE.md Lint
+  section updated: broken/orphan/exact-duplicate moved from judgment-lint → code-lint; judgment-lint
+  keeps only the fuzzy calls (near-duplicates, implicit concepts, stale claims, contradictions).
 - [ ] **Review queue** (slice): verbatim-body staging → human approve/reject before pages land in `wiki/`. Reference: `llm-wiki-compiler/src/commands/review-*.ts`. Take the small staging+policy slice, not the full concurrent-lock machinery.
 
 ### Skip (low value for this project)
