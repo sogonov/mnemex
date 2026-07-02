@@ -12,6 +12,7 @@ export function cleanRaw(opts: {
   wiki?: string; dryRun?: boolean; keepBoilerplate?: boolean;
   structure?: boolean; breadcrumb?: boolean; meta?: boolean;
 }): void {
+  // breadcrumb is opt-in (a 3-arm test found no retrieval benefit — see eval/BASELINE.md)
   const wiki = resolve(opts.wiki || defaultWikiRoot());
   console.log(`${c.bold}mnemex clean-raw${c.reset}\n`);
   step(`Wiki root: ${wiki}`);
@@ -27,7 +28,7 @@ export function cleanRaw(opts: {
   if (opts.dryRun) args.push("--dry-run");
   if (opts.keepBoilerplate) args.push("--keep-boilerplate");
   if (opts.structure === false) args.push("--no-structure");
-  if (opts.breadcrumb === false) args.push("--no-breadcrumb");
+  if (opts.breadcrumb) args.push("--breadcrumb");
   if (opts.meta === false) args.push("--no-meta");
   const r = spawnSync("node", args, { stdio: "inherit" });
   process.exit(r.status ?? 0);

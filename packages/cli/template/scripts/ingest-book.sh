@@ -36,7 +36,7 @@ shift 2
 USE_MARKER=0
 FORCE_OCR=0
 KEEP_INTERMEDIATE=0
-NO_BREADCRUMB=0
+DO_BREADCRUMB=0
 NO_STRUCTURE=0
 KEEP_BOILERPLATE=0
 
@@ -45,7 +45,7 @@ while [ "$#" -gt 0 ]; do
     --marker) USE_MARKER=1 ;;
     --ocr)    FORCE_OCR=1 ;;
     --keep)   KEEP_INTERMEDIATE=1 ;;
-    --no-breadcrumb) NO_BREADCRUMB=1 ;;
+    --breadcrumb) DO_BREADCRUMB=1 ;;
     --no-structure)  NO_STRUCTURE=1 ;;
     --keep-boilerplate) KEEP_BOILERPLATE=1 ;;
     *) echo "Unknown option: $1"; exit 1 ;;
@@ -236,12 +236,14 @@ if [ "$NO_STRUCTURE" -eq 0 ] && command -v node >/dev/null 2>&1 && [ -f "$SCRIPT
   node "$SCRIPT_DIR/structure.mjs" "$OUT_DIR/book.md" || log "structure pass skipped (non-fatal)"
 fi
 
-# ---- contextual breadcrumbs (Contextual Retrieval, conversion-time) ----
-# Inject ancestor-path breadcrumbs under nested headings so deep chunks stay
-# self-locating once qmd chunks the book. Runs before any wiki claim cites a line.
-# Opt out with --no-breadcrumb.
-if [ "$NO_BREADCRUMB" -eq 0 ] && command -v node >/dev/null 2>&1 && [ -f "$SCRIPT_DIR/breadcrumb.mjs" ]; then
-  log "Injecting contextual breadcrumbs (--no-breadcrumb to skip)"
+# ---- contextual breadcrumbs (OFF by default — opt in with --breadcrumb) ----
+# Injects ancestor-path breadcrumbs under nested headings. A controlled 3-arm test
+# (n=48, eval/probe3-*, see eval/BASELINE.md) found NO significant retrieval effect
+# (A vs +breadcrumb: Δ+2.1 pts, p=1.0) — the per-section breadcrumb doesn't reach the
+# deep chunks qmd splits off, and qmd already carries docTitle + nearest heading. So
+# it only adds noise lines to raw for no measured benefit; kept opt-in, not default.
+if [ "$DO_BREADCRUMB" -eq 1 ] && command -v node >/dev/null 2>&1 && [ -f "$SCRIPT_DIR/breadcrumb.mjs" ]; then
+  log "Injecting contextual breadcrumbs (--breadcrumb opt-in)"
   node "$SCRIPT_DIR/breadcrumb.mjs" "$OUT_DIR/book.md" || log "breadcrumb pass skipped (non-fatal)"
 fi
 

@@ -12,3 +12,8 @@ results-*.jsonl
 
 # structure-recovery probe scratch (throwaway flat/struct book copies + collections)
 .probe/
+
+# breadcrumb/structure 3-arm test: regenerable per-run dumps (fixture is committed)
+probe3-emit.jsonl
+probe3-results.json
+probe3-authored.json

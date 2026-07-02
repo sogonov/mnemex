@@ -81,7 +81,7 @@ program
   .option("--dry-run", "Report what would change without writing")
   .option("--keep-boilerplate", "Don't strip Project Gutenberg license text")
   .option("--no-structure", "Don't promote division markers to headings")
-  .option("--no-breadcrumb", "Don't inject contextual breadcrumbs")
+  .option("--breadcrumb", "Also inject contextual breadcrumbs (off by default — no measured retrieval benefit)")
   .option("--no-meta", "Don't auto-fill meta.yaml from the Gutenberg header")
   .action((opts) => cleanRaw(opts));
 

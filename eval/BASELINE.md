@@ -163,10 +163,60 @@ demonstrable wins remain the **cross-lingual moat** and **provenance/citation** 
 Resolving the graph would need hundreds of queries (to shrink the CIs) on a large corpus; it is
 not a relaunch headline today.
 
+## Contextual breadcrumb / structure recovery — the honest 3-arm test (2026-07-03)
+
+Phase 2b shipped a conversion-time **contextual breadcrumb** (ancestor-path line under nested
+headings — mnemex's flavor of Anthropic Contextual Retrieval) and a **structure-recovery** pass
+(promote flat Gutenberg `BOOK/CHAPTER` markers → ATX headings). The retrieval benefit was asserted
+"structurally, not measured" — the exact vibes-trap this project exists to avoid. So it was tested.
+
+**Design (real power, unlike the earlier under-powered `probe-structure.mjs`).** 6 real
+nested-structure books from the owner's library (Kleppmann, Kimball, Fowler, Ousterhout, Voss,
+Taleb), indexed **three ways** as separate qmd collections: **A** plain · **B** +breadcrumb ·
+**SB** +structure+breadcrumb. **48 context-dependent queries** authored by 6 agents (one per book,
+blind to the arms; `eval/probe3-*`), each with a verbatim `gold_phrase` from a deep passage;
+queries deliberately share few content words with the gold (tests context, not lexical overlap).
+A deterministic gate dropped any fabricated or leaky query (**48/48 passed**). A query is
+*chunk-correct* for an arm iff the gold book's best chunk (`bestChunk`) contains the gold phrase.
+Scored via the qmd SDK (`store.search`, reranker on), incremental JSONL so a kill never loses data.
+
+| arm | chunk-correct (95% CI) | MRR | book-in-topK |
+|---|---|---|---|
+| A  plain | 22.9 [13,35] | 0.198 | 100% |
+| B  +breadcrumb | 25.0 [13,38] | 0.219 | 100% |
+| SB +structure+breadcrumb | 22.9 [10,35] | 0.208 | 100% |
+
+| comparison | Δ | paired permutation p | verdict |
+|---|---|---|---|
+| **A→B** (breadcrumb) | +2.1 pts | **1.0000** | **not significant** |
+| A→SB (structure+breadcrumb) | +0.0 pts | 1.0000 | not significant |
+| B→SB (structure added) | −2.1 pts | 1.0000 | not significant |
+
+**Verdict — breadcrumb fails; it was cut from the defaults.** Δ+2.1 is a single query out of 48;
+p=1.0; the CIs sit on top of each other. The mechanism is understood: a **per-section** breadcrumb
+never reaches the deep chunks qmd splits off (mnemex doesn't control qmd's chunk boundaries, so it
+can't do Anthropic's true **per-chunk** prefix), and qmd already embeds `docTitle | text` + chunks
+heading-aware — so the breadcrumb's marginal signal is nil. Per the pre-committed decision rule
+(*ship default-on only if A→B is significant*), **breadcrumb is now OFF by default** (opt-in
+`--breadcrumb`); the code stays for anyone who wants it. **Structure recovery** shows no retrieval
+lift either (A≈SB) but is kept default-on on a **separate, non-retrieval** justification — it turns
+a 0-heading Gutenberg blob into a navigable, outline-able chaptered document (a deterministic,
+visible transformation) and doesn't hurt retrieval. The demonstrated, un-confounded conversion wins
+remain **boilerplate strip** (−6,195 lines) and **metadata auto-fill** (16/16 books) — both
+deterministic, neither a retrieval claim.
+
+Caveat honestly stated: `book-in-topK` is 100% (6 topically-distinct books → the right book is
+always found), so the test measures **chunk selection within the right book**, which is exactly what
+a breadcrumb should sway — and it doesn't. A larger, topically-crowded corpus could in principle
+stress cross-book disambiguation differently, but on this evidence breadcrumb earns no default slot.
+
 ## Reproduce
 
 ```bash
 export QMD_EMBED_MODEL="hf:Qwen/Qwen3-Embedding-0.6B-GGUF/Qwen3-Embedding-0.6B-Q8_0.gguf"
+# breadcrumb/structure 3-arm test: build A/B/SB collections from 6 books, embed, then:
+node eval/probe3-score.mjs --fixture eval/probe3-fixture.json --emit eval/probe3-emit.jsonl
+node eval/probe3-score.mjs --emit eval/probe3-emit.jsonl --aggregate   # re-report from saved rows
 # corpus.md builds eval/.wiki/raw (16 books) + registers the mnemex-wiki qmd collection
 node eval/run-retrieval.mjs --label A-plain --out eval/results-A-plain.json  # arm A, buckets, CI
 node eval/run-retrieval-graph.mjs --fixture eval/fixture-retrieval-v2.json   # 4-arm A/B/C/D ablation

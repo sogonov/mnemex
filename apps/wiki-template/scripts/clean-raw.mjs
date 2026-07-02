@@ -13,7 +13,8 @@
 //
 // Usage:
 //   node scripts/clean-raw.mjs [--wiki <path>] [--dry-run]
-//        [--keep-boilerplate] [--no-structure] [--no-breadcrumb] [--no-meta]
+//        [--keep-boilerplate] [--no-structure] [--breadcrumb] [--no-meta]
+//   (breadcrumb is OFF by default — a 3-arm test found no retrieval benefit; opt in)
 //   node scripts/clean-raw.mjs --selftest
 //   (defaults: --wiki = $WIKI_ROOT or the current directory)
 //
@@ -38,7 +39,7 @@ export function cleanOne(bookText, metaText, opts = {}) {
   let book = bookText;
   if (!opts.keepBoilerplate) { const r = stripBoilerplate(book); book = r.text; delta.stripped = r.head + r.tail; }
   if (!opts.noStructure) { const r = recoverStructure(book); book = r.text; delta.promoted = r.promoted.length; }
-  if (!opts.noBreadcrumb) { const before = book; book = breadcrumbMarkdown(book); delta.breadcrumbs = (book.match(/^\*↪ /gm) || []).length; delta.changed = book !== before || delta.stripped || delta.promoted; }
+  if (opts.breadcrumb) { const before = book; book = breadcrumbMarkdown(book); delta.breadcrumbs = (book.match(/^\*↪ /gm) || []).length; delta.changed = book !== before || delta.stripped || delta.promoted; }
   return { book, meta, delta };
 }
 
@@ -114,7 +115,7 @@ if (/(^|\/)clean-raw\.mjs$/.test(process.argv[1] || "")) {
     dryRun: argv.includes("--dry-run"),
     keepBoilerplate: argv.includes("--keep-boilerplate"),
     noStructure: argv.includes("--no-structure"),
-    noBreadcrumb: argv.includes("--no-breadcrumb"),
+    breadcrumb: argv.includes("--breadcrumb"),
     noMeta: argv.includes("--no-meta"),
   });
 }

@@ -80,14 +80,18 @@ Ruthless scoping is the point: "merge everything" kills solo projects. Ship each
   Fixed with `scripts/structure.mjs` — promotes flat division markers (BOOK/PART→H1, CHAPTER→H2)
   to real headings, high-precision (validated: clean hierarchy in 10/16 books, 6 essay-collections
   correctly untouched), body-confined, idempotent. Both wired into `ingest-book.sh` (structure →
-  breadcrumb; opt-outs `--no-structure`/`--no-breadcrumb`). Fixed a real ESM bug found en route:
-  the scripts' CLI code ran on *import* (corrupting a file) — now gated to main-module.
-  **Measurement: INCONCLUSIVE, no lift claimed.** `eval/probe-structure.mjs` (flat vs struct, same
-  book) is underpowered by construction (identical text → identical retrieval) and qmd's
-  chunk-offset↔line mapping is unreliable; the MRR 0.10==0.10 is a tooling artifact, not a null.
-  Features ship justified **structurally** (heading-aware chunking + breadcrumb + navigation +
-  chapter-anchored provenance), NOT on a recall number. A clean measurement needs a different
-  design (chunk-boundary purity). NOT a relaunch headline.
+  breadcrumb). Fixed a real ESM bug found en route: the scripts' CLI code ran on *import*
+  (corrupting a file) — now gated to main-module.
+  **MEASURED (2026-07-03) → breadcrumb CUT from defaults.** A real 3-arm test (n=48, 6 nested books,
+  independently-authored context queries with verbatim gold phrases, qmd SDK + reranker; `eval/probe3-*`,
+  full write-up in `eval/BASELINE.md`) — **A plain 22.9% · B +breadcrumb 25.0% · SB +structure+breadcrumb
+  22.9% chunk-correct; A→B Δ+2.1 pts, p=1.0 — NOT significant.** Mechanism: a per-section breadcrumb
+  never reaches the deep chunks qmd splits off (we don't control qmd chunking → can't do Anthropic's
+  per-chunk prefix), and qmd already embeds docTitle+heading. Per the pre-committed rule, **breadcrumb
+  is now OFF by default** (opt-in `--breadcrumb`; code kept). **structure** shows no retrieval lift
+  either but stays default-on on a **non-retrieval** justification (turns a 0-heading blob into a
+  navigable outline; doesn't hurt retrieval). This is the process the owner demanded: test → confirm →
+  cut what doesn't earn its place. NOT a relaunch headline.
 - [x] **Gutenberg boilerplate strip.** `scripts/strip-boilerplate.mjs` drops the license header +
   footer bracketing every Gutenberg text (`*** START *** / *** END ***`). **Measured, deterministic,
   trustworthy** (no flaky retrieval): ~385 lines/book, **6,195 total** across the 16-book corpus,

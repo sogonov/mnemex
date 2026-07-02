@@ -320,9 +320,10 @@ To download and ingest books into `raw/books/`, the `@mnemex/library-mcp` server
 **The conversion pipeline runs automatically** in `ingest-book.sh` (opt-outs in parens), so `raw/books/<slug>/book.md` arrives clean:
 1. **`extract-meta.mjs`** — auto-fills `meta.yaml` (title / author / year / language / eBook-id / translator / editor) from the Gutenberg header, so **you rarely fill bibliographic meta by hand** — read `meta.yaml` first and only fill what's blank.
 2. **`strip-boilerplate.mjs`** — removes the Project Gutenberg license header + footer (`--keep-boilerplate`).
-3. **`structure.mjs`** — promotes flat `BOOK/PART/CHAPTER …` division markers to real ATX headings so search chunks along chapters (`--no-structure`).
-4. **`breadcrumb.mjs`** — injects ancestor-path breadcrumbs under nested headings (`--no-breadcrumb`).
+3. **`structure.mjs`** — promotes flat `BOOK/PART/CHAPTER …` division markers to real ATX headings so the book is navigable (Obsidian outline) and qmd can chunk along chapters (`--no-structure`).
 
-All four are conversion-time (before any `^[raw:L-L]` token exists → line numbers stay stable), idempotent, and multilingual-safe. They no-op on non-Gutenberg / heading-less sources.
+The passes run conversion-time (before any `^[raw:L-L]` token exists → line numbers stay stable), are idempotent, multilingual-safe, and no-op on non-Gutenberg / heading-less sources.
+
+**Off by default: `breadcrumb.mjs`** (opt in with `--breadcrumb`). It injects ancestor-path breadcrumbs under headings — Anthropic-style Contextual Retrieval. A controlled 3-arm test (n=48, `eval/probe3-*`, see `eval/BASELINE.md`) found **no significant retrieval benefit** (Δ+2.1 pts, p=1.0): a per-section breadcrumb never reaches the deep chunks qmd splits off, and qmd already carries docTitle + nearest heading. So it only adds noise lines to raw for no measured gain — kept opt-in, not run by default.
 
 **Retrofit old books:** for anything ingested before these passes existed, run `mnemex clean-raw` (or `node scripts/clean-raw.mjs --wiki .`) — it applies the same pipeline to every `raw/books/*/book.md`. Use `--dry-run` first to preview; it's idempotent, so a second run is a no-op.
