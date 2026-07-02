@@ -101,22 +101,25 @@ function selftest() {
   return fail;
 }
 
-// ---- entry ----------------------------------------------------------------
+// ---- entry (only when run directly, NOT when imported) --------------------
 
-if (process.argv.includes("--selftest")) process.exit(selftest() ? 1 : 0);
+// ESM runs an imported module top-to-bottom — gate the CLI so importing
+// breadcrumbMarkdown() can't rewrite the parent's argv file. See structure.mjs.
+if (/(^|\/)breadcrumb\.mjs$/.test(process.argv[1] || "")) {
+  if (process.argv.includes("--selftest")) process.exit(selftest() ? 1 : 0);
+  const argv = process.argv.slice(2);
+  const file = argv.find((a) => !a.startsWith("--"));
+  const toStdout = argv.includes("--stdout");
+  const stripOnly = argv.includes("--strip");
+  if (!file) { console.error("usage: node scripts/breadcrumb.mjs <book.md> [--stdout] [--strip]"); process.exit(2); }
+  if (!existsSync(file)) { console.error(`breadcrumb: file not found: ${file}`); process.exit(2); }
 
-const argv = process.argv.slice(2);
-const file = argv.find((a) => !a.startsWith("--"));
-const toStdout = argv.includes("--stdout");
-const stripOnly = argv.includes("--strip");
-if (!file) { console.error("usage: node scripts/breadcrumb.mjs <book.md> [--stdout] [--strip]"); process.exit(2); }
-if (!existsSync(file)) { console.error(`breadcrumb: file not found: ${file}`); process.exit(2); }
-
-const input = readFileSync(file, "utf8");
-const result = stripOnly ? stripBreadcrumbs(input) : breadcrumbMarkdown(input);
-if (toStdout) { process.stdout.write(result + "\n"); }
-else {
-  writeFileSync(file, result.endsWith("\n") ? result : result + "\n");
-  const n = (result.match(/^\*↪ /gm) || []).length;
-  console.error(`breadcrumb: ${stripOnly ? "stripped" : `injected ${n} breadcrumb(s)`} → ${file}`);
+  const input = readFileSync(file, "utf8");
+  const result = stripOnly ? stripBreadcrumbs(input) : breadcrumbMarkdown(input);
+  if (toStdout) { process.stdout.write(result + "\n"); }
+  else {
+    writeFileSync(file, result.endsWith("\n") ? result : result + "\n");
+    const n = (result.match(/^\*↪ /gm) || []).length;
+    console.error(`breadcrumb: ${stripOnly ? "stripped" : `injected ${n} breadcrumb(s)`} → ${file}`);
+  }
 }

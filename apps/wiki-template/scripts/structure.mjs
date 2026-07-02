@@ -102,22 +102,26 @@ function selftest() {
   return fail;
 }
 
-// ---- entry ----------------------------------------------------------------
+// ---- entry (only when run directly, NOT when imported) --------------------
 
-if (process.argv.includes("--selftest")) process.exit(selftest() ? 1 : 0);
+// ESM executes an imported module top-to-bottom, so this CLI block must be gated
+// or importing recoverStructure() would rewrite whatever file sits in the parent's
+// argv. Gate on the entry script actually being structure.mjs.
+if (/(^|\/)structure\.mjs$/.test(process.argv[1] || "")) {
+  if (process.argv.includes("--selftest")) process.exit(selftest() ? 1 : 0);
+  const argv = process.argv.slice(2);
+  const file = argv.find((a) => !a.startsWith("--"));
+  const toStdout = argv.includes("--stdout");
+  const dryRun = argv.includes("--dry-run");
+  if (!file) { console.error("usage: node scripts/structure.mjs <book.md> [--stdout] [--dry-run]"); process.exit(2); }
+  if (!existsSync(file)) { console.error(`structure: file not found: ${file}`); process.exit(2); }
 
-const argv = process.argv.slice(2);
-const file = argv.find((a) => !a.startsWith("--"));
-const toStdout = argv.includes("--stdout");
-const dryRun = argv.includes("--dry-run");
-if (!file) { console.error("usage: node scripts/structure.mjs <book.md> [--stdout] [--dry-run]"); process.exit(2); }
-if (!existsSync(file)) { console.error(`structure: file not found: ${file}`); process.exit(2); }
-
-const { text, promoted } = recoverStructure(readFileSync(file, "utf8"));
-if (dryRun) {
-  for (const p of promoted) console.error(`  L${String(p.line).padStart(6)}  H${p.level}  ${p.text}`);
-  console.error(`structure: would promote ${promoted.length} division(s) in ${file}`);
-  process.exit(0);
+  const { text, promoted } = recoverStructure(readFileSync(file, "utf8"));
+  if (dryRun) {
+    for (const p of promoted) console.error(`  L${String(p.line).padStart(6)}  H${p.level}  ${p.text}`);
+    console.error(`structure: would promote ${promoted.length} division(s) in ${file}`);
+    process.exit(0);
+  }
+  if (toStdout) process.stdout.write(text + "\n");
+  else { writeFileSync(file, text.endsWith("\n") ? text : text + "\n"); console.error(`structure: promoted ${promoted.length} division(s) → ${file}`); }
 }
-if (toStdout) process.stdout.write(text + "\n");
-else { writeFileSync(file, text.endsWith("\n") ? text : text + "\n"); console.error(`structure: promoted ${promoted.length} division(s) → ${file}`); }

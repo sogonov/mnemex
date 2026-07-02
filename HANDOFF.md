@@ -72,7 +72,22 @@ Ruthless scoping is the point: "merge everything" kills solo projects. Ship each
 - [x] **Mini eval harness.** `eval/` — fixture + questions + run.mjs; upgraded to credibility-grade (nDCG@10/MAP/MRR, bootstrap CI, permutation, stratified buckets incl. cross-lingual + no-answer).
 
 ### Phase 2 — retrieval quality — mostly measured; little left to build
-- [ ] **Contextual breadcrumb (2b).** DESIGNED (`docs/methodology/contextual-retrieval-design.md`), not built. Language-matched breadcrumb at conversion time; re-run eval → arm B. Headroom expected small (qmd already carries title + heading hierarchy). Reference: `claude-obsidian/scripts/contextual-prefix.py`.
+- [x] **Contextual breadcrumb (2b) — BUILT + the real unlock behind it.** `scripts/breadcrumb.mjs`
+  injects ancestor-path breadcrumbs under nested headings (conversion-time, before provenance
+  tokens; idempotent, fence-aware, `\p{L}`-safe). But building it exposed the actual gap:
+  **Gutenberg text is heading-less** (chapters are ALL-CAPS lines, 0 ATX headings across all 16
+  eval books), so qmd chunks blindly across chapters and the breadcrumb had nothing to anchor to.
+  Fixed with `scripts/structure.mjs` — promotes flat division markers (BOOK/PART→H1, CHAPTER→H2)
+  to real headings, high-precision (validated: clean hierarchy in 10/16 books, 6 essay-collections
+  correctly untouched), body-confined, idempotent. Both wired into `ingest-book.sh` (structure →
+  breadcrumb; opt-outs `--no-structure`/`--no-breadcrumb`). Fixed a real ESM bug found en route:
+  the scripts' CLI code ran on *import* (corrupting a file) — now gated to main-module.
+  **Measurement: INCONCLUSIVE, no lift claimed.** `eval/probe-structure.mjs` (flat vs struct, same
+  book) is underpowered by construction (identical text → identical retrieval) and qmd's
+  chunk-offset↔line mapping is unreliable; the MRR 0.10==0.10 is a tooling artifact, not a null.
+  Features ship justified **structurally** (heading-aware chunking + breadcrumb + navigation +
+  chapter-anchored provenance), NOT on a recall number. A clean measurement needs a different
+  design (chunk-boundary purity). NOT a relaunch headline.
 - [x] **Reranking** — already delivered by qmd (qwen3-reranker); confirmed the dominant lever. Nothing to build.
 - [x] **Cross-lingual moat** — proven (RU→EN ≈83%), no build needed.
 - 🅿️ **Typed-graph retrieval** — parked R&D (eval-only, unproven; see Progress section). Not a phase deliverable.
