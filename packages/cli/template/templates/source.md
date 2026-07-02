@@ -41,8 +41,8 @@ What is the author actually arguing? In 3–5 sentences.
 
 ### Chapter 1: <title>
 - Main point:
-- Key claims (with location):
-  - p.X: "..." → linked to [[Concept-Page]]
+- Key claims (with provenance):
+  - "..." ^[raw/books/<slug>/book.md:120-134] → linked to [[Concept-Page]]
 - Examples:
 - Open questions:
 
@@ -61,15 +61,30 @@ What is the author actually arguing? In 3–5 sentences.
 
 ## Extracted claims
 
-A flat list of citable claims, each linked to its location. The synthesis layer pulls from here.
+A flat list of citable claims. **Every claim MUST carry a provenance token** that resolves
+to the exact lines in the raw source: `^[<raw-path>:Lstart-Lend]`. The line range points into
+the immutable `raw/` file (stable line numbers), not the wiki page. The synthesis layer pulls
+from here; `scripts/lint-citations.mjs` flags any claim missing or with a broken token.
 
-- *p.X*: <claim> → relevant to [[Concept-A]]
-- *Ch.3*: <claim>
+- <claim> ^[raw/books/<slug>/book.md:412-418] → relevant to [[Concept-A]]
+- <claim> ^[raw/books/<slug>/book.md:640-655] → relevant to [[Concept-B]]
+- Chapter-only fallback when no line map exists: <claim> ^[<slug>#Ch.3]
 - ...
 
 ## Contradictions / tensions
 
-- This source claims X, but [[Other-Source]] claims Y. See: [[Synthesis-Page]].
+Three callout types — pick the one that fits; never silently overwrite a conflicting claim. Each
+names both sides and ends with a boundary-conditioned `Resolution:` (see CLAUDE.md → Contradictions & tensions).
+
+> [!warning] Contradiction — this source vs. [[Other-Source]]
+> This source claims X ^[raw/books/<slug>/book.md:120-128]. [[Other-Source]] claims Y.
+> **Resolution:** X holds when <condition>; Y holds when <condition>. See [[Synthesis-Page]].
+
+> [!warning] Tension — <term> here vs. [[Other-Source]]
+> Same term, different referent/scale — flag so they aren't conflated.
+
+> [!note] Composition with [[Other-Source]]
+> Complementary, not conflicting — one supplies substance, the other delivery.
 
 ## Owner notes
 
