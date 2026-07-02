@@ -51,3 +51,28 @@ node eval/run.mjs
 
 Until the eval wiki is built (steps above), `run.mjs` reports the corpus as *not built* and
 scores 0 — that's expected. Phase 1 ships the harness, fixtures, and gold set, not the numbers.
+
+## Enlarged corpus (16 books) — for the typed-graph ablation
+
+The graph retest (`run-retrieval-graph.mjs`, `fixture-retrieval-v2.json`) uses 12 more Gutenberg
+classics on top of the original 4, chosen so genuine cross-book relationships exist:
+
+| # | Gutenberg | source page |
+|---|---|---|
+| 5 | 8438 | Nicomachean-Ethics-Aristotle | 6 | 1497 | The-Republic-Plato |
+| 7 | 2945 | Essays-Emerson | 8 | 205 | Walden-Thoreau |
+| 9 | 3300 | Wealth-of-Nations-Smith | 10 | 1228 | Origin-of-Species-Darwin |
+| 11 | 34901 | On-Liberty-Mill | 12 | 575 | Essays-Bacon |
+| 13 | 3207 | Leviathan-Hobbes | 14 | 1946 | On-War-Clausewitz |
+| 15 | 3600 | Essays-Montaigne | 16 | 674 | Plutarch-Lives |
+
+Fetch each raw text verbatim to `raw/books/<slug>/book.md`
+(`https://www.gutenberg.org/cache/epub/<id>/pg<id>.txt`). The **source pages** (with claims +
+typed edges) are committed under `.wiki/wiki/sources/`, so only the raw texts + qmd index rebuild.
+
+**Independent-authorship protocol (breaks circularity — do not collapse it).** The typed edges and
+the cross-source queries MUST be authored by parties blind to each other: whoever writes a page's
+`Contrasted with` / `See also` / `Builds on` edges must not see the eval queries, and whoever
+writes the cross-source queries must read only the raw books, never the edges. This is why the
+arm-C `B→C` lift on edged pairs (independent authorship) is a real result, not teaching-to-the-test.
+See `BASELINE.md` → "Arm C".

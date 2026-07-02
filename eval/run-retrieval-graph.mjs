@@ -127,4 +127,7 @@ for (const [name, rs] of [["EDGED (circular)", hold.filter((r) => r.edged)], ["U
 }
 const na = rows.filter((r) => r.noAnswer);
 if (na.length) console.log(`\n  no-answer abstention: ${na.filter((r) => r.abstained).length}/${na.length}`);
-console.log(`  ${Cl.d}Note: |corpus|=${allPages.length} pages. With k=${K} ≥ corpus, arm D (rerank-all) is a near-ceiling and recall is degenerate — this eval measures DIRECTION only, not a shippable lift.${Cl.x}`);
+if (K >= allPages.length)
+  console.log(`  ${Cl.d}Note: k=${K} ≥ |corpus|=${allPages.length} — recall is degenerate (top-k ⊇ corpus); this measures DIRECTION only. Grow the corpus.${Cl.x}`);
+else
+  console.log(`  ${Cl.d}|corpus|=${allPages.length} pages, k=${K} < corpus → recall@${K} is non-degenerate. Arm D reranks ALL ${allPages.length} pages — a strong ceiling on a still-small corpus; the graph's edge over D needs a corpus big enough that rerank-all is impractical.${Cl.x}`);

@@ -54,7 +54,10 @@ prince can master half of it.
 
 - [[Meditations-Marcus-Aurelius]] — virtue as instrument of power (Machiavelli) vs. virtue as its own end (Marcus Aurelius). See [[Virtue-Instrument-vs-End]].
 - [[Autobiography-Franklin]] — reputation as something to *appear* to have (Machiavelli) vs. character built and tracked for its own sake (Franklin).
+- [[The-Republic-Plato]] — the ideal ruler as philosopher-king pursuing justice (Plato) vs. the realist prince who learns "how not to be good" and is judged by results (Machiavelli).
+- [[Leviathan-Hobbes]] — where authority comes from: Hobbes grounds the sovereign in a social contract that escapes the state of nature; Machiavelli grounds the prince in necessity, arms, and the management of fortune.
 
 ## See also
 
 - [[Art-of-War-Sun-Tzu]] — outmaneuvering rivals: strategy in politics vs. war.
+- [[Wealth-of-Nations-Smith]] — the other face of self-interest: Machiavelli harnesses it for the ruler's security, Smith shows it coordinating a whole economy through the invisible hand.

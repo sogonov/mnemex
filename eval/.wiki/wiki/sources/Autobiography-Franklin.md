@@ -52,6 +52,11 @@ discipline — one at a time, tracked daily, ordered by a fixed daily schedule.
 
 - [[The-Prince-Machiavelli]] — building real character and reputation (Franklin) vs. merely appearing virtuous for advantage (Machiavelli).
 
+## Builds on
+
+- [[Nicomachean-Ethics-Aristotle]] — virtue as habit: Aristotle argues we become just by doing just acts and virtue is formed by habituation; Franklin's thirteen-virtue chart is exactly this doctrine turned into a daily engineering discipline.
+
 ## See also
 
 - [[Meditations-Marcus-Aurelius]] — self-discipline and self-mastery: Franklin's thirteen-virtue system is Stoic practice by another name.
+- [[Essays-Emerson]] — the American self writ large: Emerson's self-reliance and nonconformity are the Romantic descendant of Franklin's self-made, self-improving individual.

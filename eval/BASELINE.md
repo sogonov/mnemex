@@ -6,9 +6,18 @@ fixture + questions unchanged to produce the before/after delta for the relaunch
 
 ## Corpus
 
-4 public-domain Gutenberg books, focused-ingested into 4 source pages + 1
-synthesis (`eval/.wiki/`, gitignored — rebuild via `corpus.md`). Every extracted
-claim carries a line-level `^[raw:Lstart-Lend]` token; lint passes clean.
+**16 public-domain Gutenberg classics** (strategy, ethics, politics, self-direction, science),
+ingested into 16 source pages + 1 synthesis (`eval/.wiki/wiki/`, tracked; raw texts gitignored —
+rebuild via `corpus.md`). Every extracted claim carries a line-level `^[raw:Lstart-Lend]` token;
+lint passes clean (17 pages). The pages carry ~45 hand-typed cross-book edges
+(`Contrasted with` / `See also` / `Builds on`). The original arm-A/per-backend numbers below were
+measured on the first 4-book / 5-page cut; the arm-C ablation is on the full 16-book / 17-page set.
+
+**Independent-authorship protocol (breaks circularity).** The typed edges and the 36 cross-source
+eval queries were produced by **two separate agent pools running concurrently, each blind to the
+other's output**: edge-authors read a book and wrote its page + edges without seeing any query;
+query-authors read the raw books and wrote cross-source questions without seeing any edge. So a
+query landing on an edged pair reflects real relatedness, not an author teaching to the test.
 
 ## Headline
 
@@ -68,54 +77,57 @@ held-out queries were **circular** (the same author wrote both the edges and the
 `A→B` is the ranking-function switch; **`B→C` is the graph's true marginal effect**; `C vs D`
 asks whether the graph beats brute-force "rerank everything."
 
+**Measured on the enlarged, independent-authorship setup** (16-book corpus → 17 pages; the typed
+edges and the cross-source queries were written by **separate agent pools, each blind to the
+other's output** — see `corpus.md`; fixture `fixture-retrieval-v2.json`, 36 independent
+cross-source queries):
+
 | bucket | n | A | B | C | D |
 |---|---|---|---|---|---|
-| exact/title, single-hop | 12 | 100.0 | 100.0 | 100.0 | 100.0 |
-| cross-source | 11 | 49.2 | 52.0 | 66.8 | **80.5** |
-| cross-lingual (RU→EN) | 6 | 83.3 | 83.3 | 83.3 | **100.0** |
+| exact/title | 3 | 100.0 | 100.0 | 100.0 | 100.0 |
+| single-hop | 9 | 88.9 | 88.9 | 88.9 | 100.0 |
+| cross-lingual (RU→EN) | 6 | 83.3 | 83.3 | 83.3 | 100.0 |
+| **cross-source** | 36 | 74.8 | 76.4 | **87.6** | **91.6** |
 
-Held-out cross-source, split by whether a hand-typed edge actually bridges the gold pair:
+Cross-source split by whether a typed edge actually bridges the gold pair (auto-detected):
 
-| held-out slice | n | B (rerank seeds) | C (+graph) | Δ (B→C) | permutation p |
+| slice | n | B (rerank seeds) | C (+graph) | Δ (B→C) | permutation p |
 |---|---|---|---|---|---|
-| **edged** (circular by construction) | 5 | 32.3 | 52.5 | +20.2 | 0.25 |
-| **un-edged** (generalization test) | 2 | 61.3 | 61.3 | **0.0** | 1.0 |
+| **edged** | 32 | 77.0 | **89.8** | **+12.8** | **0.0016** |
+| **un-edged** | 4 | 71.0 | 70.4 | −0.5 | 1.0 |
 
-**Honest read — the typed-graph leapfrog is NOT demonstrated.**
-- **Zero generalization:** on gold pairs I did *not* hand-connect, the graph adds **nothing**
-  (un-edged Δ = 0.0). It "helps" only on the exact pairs whose edges I wrote — i.e. it recovers
-  what was planted, which is circular.
-- **Beaten by brute force:** arm **D (rerank-all-5-pages) = 80.5 > C = 66.8** on cross-source, and
-  D fixes the cross-lingual miss too (100 vs 83.3). On a 5-page corpus, "consider every page and
-  rerank" dominates graph expansion — the corpus is far too small (k=10 ≥ |corpus|=5) for a graph
-  to matter or for recall to be meaningful.
-- **What *is* real and un-confounded:** the **cross-lingual moat** (arm A, RU→EN 83%, 5/6) and the
-  **no-answer control** (4/4 abstained). Those need no graph.
+**Honest read — the graph now shows a real, significant effect, but does not yet beat brute force.**
+- **Significant and NOT circular:** on edged pairs, graph expansion lifts nDCG@10 **+12.8 pts
+  (p = 0.0016)** — and the queries were authored **independently** of the edges (separate blind
+  agent pools), so this is not the earlier self-authored artifact. When two genuinely-related books
+  are asked about together, walking the typed edge surfaces the second source the seed retrieval
+  ranked low.
+- **Bounded, as it should be:** on **un-edged** pairs the graph adds **nothing** (Δ ≈ 0) — no edge,
+  no help. That's the correct boundary, not a bug; it says the graph helps exactly where the wiki
+  encodes a relationship.
+- **Still beaten by brute force here:** arm **D (rerank all 17 pages) = 91.6 > C = 87.6**. On a
+  17-page corpus, "consider every page and rerank" is still cheap and slightly better than the
+  graph's targeted union. **The graph's real advantage — not having to rerank the whole corpus —
+  only pays off when the library is large enough that rerank-all is impractical/noisy.** 17 pages
+  isn't there yet; this is a direction, not a shippable win over D.
+- Regressions from the bigger corpus: one single-hop query (88.9) and one no-answer (3/4 abstained)
+  now find a loose competitor among 17 pages — expected as the corpus grows; arm D still nails them.
 
-**Status:** the graph plumbing is built + unit-tested (`graph-expand.mjs --selftest`) and the
-cross-encoder-over-union path is verified reachable — but **do not put a typed-graph retrieval
-lift in any external claim.** A real test needs (1) a much larger corpus so arm D isn't a ceiling,
-(2) **independently-authored** edges and queries, and (3) coverage of un-edged pairs. That is the
-next eval increment, not a finished result.
-
-## The 2 misses (Phase 2 targets)
-
-Both are cross-domain queries needing **two** source pages, where only one was
-retrieved — the case Contextual Retrieval is meant to fix:
-
-- `cross-leader-character` ("what character should a leader cultivate") →
-  expected Meditations + Franklin; got The Prince + the synthesis.
-- `cross-strategy-politics` ("outmaneuvering rivals through strategy") →
-  expected Art of War + The Prince; got only Art of War.
+**Status.** The typed-graph tier is **no longer "unproven"**: it produces a **statistically
+significant, independently-verified** lift over the seeds-only rerank on related-pair questions.
+What is **not** yet shown is that it beats simply reranking the whole corpus — that needs a
+much larger library (hundreds+ of pages) where rerank-all stops being feasible. External-facing
+claim, honestly scoped: *"walking the hand-typed graph gives a significant recall lift over hybrid
+retrieval on cross-source questions (p<0.01, independent eval); at small corpus sizes a full
+rerank still matches it, so the graph's efficiency edge is pending a larger library."*
 
 ## Reproduce
 
 ```bash
 export QMD_EMBED_MODEL="hf:Qwen/Qwen3-Embedding-0.6B-GGUF/Qwen3-Embedding-0.6B-Q8_0.gguf"
-# corpus.md steps build eval/.wiki and register the mnemex-wiki qmd collection
-node eval/run.mjs                                   # citation + recall (qmd bench)
-node eval/run-retrieval.mjs --label A-plain --out eval/results-A-plain.json  # arm A
-node eval/run-retrieval-graph.mjs                                            # arm A vs C (graph)
+# corpus.md builds eval/.wiki/raw (16 books) + registers the mnemex-wiki qmd collection
+node eval/run-retrieval.mjs --label A-plain --out eval/results-A-plain.json  # arm A, buckets, CI
+node eval/run-retrieval-graph.mjs --fixture eval/fixture-retrieval-v2.json   # 4-arm A/B/C/D ablation
 node eval/metrics.mjs --selftest && node eval/stats.mjs --selftest \
   && node eval/graph-expand.mjs --selftest eval/.wiki/wiki                   # unit tests
 ```

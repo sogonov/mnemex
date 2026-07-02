@@ -53,6 +53,11 @@ turned into daily self-discipline.
 
 - [[The-Prince-Machiavelli]] — virtue as its own end (Marcus) vs. virtue as instrument (Machiavelli). See [[Virtue-Instrument-vs-End]].
 
+## Builds on
+
+- [[Nicomachean-Ethics-Aristotle]] — the classical theory of virtue and eudaimonia that Stoic ethics presupposes and revises: Aristotle grounds the good life in virtuous activity and the golden mean; Marcus turns virtue inward as daily self-discipline and acceptance of fate.
+
 ## See also
 
 - [[Autobiography-Franklin]] — self-discipline as daily practice: Marcus's morning preparation and Franklin's daily virtue chart are the same habit, centuries apart.
+- [[Essays-Montaigne]] — the other great book of self-examination: Montaigne's skeptical, essaying self-knowledge alongside Marcus's Stoic self-command, both notebooks a man keeps to study himself.

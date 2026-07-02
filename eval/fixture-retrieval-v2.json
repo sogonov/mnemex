@@ -1,0 +1,614 @@
+{
+  "description": "Independent-authorship retrieval fixture (v2). 36 cross-source queries authored from raw books BLIND to the typed edges; plus regression + no-answer buckets. For run-retrieval-graph.mjs over the 16-book corpus.",
+  "version": 2,
+  "queries": [
+    {
+      "id": "aow-exact",
+      "q": "the art of war sun tzu",
+      "bucket": "exact/title",
+      "split": "dev",
+      "expected_files": [
+        "sources/Art-of-War-Sun-Tzu.md"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "prince-exact",
+      "q": "the prince machiavelli",
+      "bucket": "exact/title",
+      "split": "dev",
+      "expected_files": [
+        "sources/The-Prince-Machiavelli.md"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "med-exact",
+      "q": "meditations marcus aurelius",
+      "bucket": "exact/title",
+      "split": "dev",
+      "expected_files": [
+        "sources/Meditations-Marcus-Aurelius.md"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "aow-deception",
+      "q": "how to deceive the enemy before a battle",
+      "bucket": "single-hop",
+      "split": "dev",
+      "expected_files": [
+        "sources/Art-of-War-Sun-Tzu.md"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "aow-spies",
+      "q": "using spies and gathering intelligence",
+      "bucket": "single-hop",
+      "split": "dev",
+      "expected_files": [
+        "sources/Art-of-War-Sun-Tzu.md"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "aow-terrain",
+      "q": "military strategy and the use of terrain",
+      "bucket": "single-hop",
+      "split": "dev",
+      "expected_files": [
+        "sources/Art-of-War-Sun-Tzu.md"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "prince-feared-loved",
+      "q": "is it better for a ruler to be feared or loved",
+      "bucket": "single-hop",
+      "split": "dev",
+      "expected_files": [
+        "sources/The-Prince-Machiavelli.md"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "prince-fortune",
+      "q": "the role of fortune and chance in holding power",
+      "bucket": "single-hop",
+      "split": "dev",
+      "expected_files": [
+        "sources/The-Prince-Machiavelli.md"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "med-control",
+      "q": "accepting what is outside your control",
+      "bucket": "single-hop",
+      "split": "dev",
+      "expected_files": [
+        "sources/Meditations-Marcus-Aurelius.md"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "med-stoicism",
+      "q": "stoicism",
+      "bucket": "single-hop",
+      "split": "dev",
+      "expected_files": [
+        "sources/Meditations-Marcus-Aurelius.md"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "franklin-virtues",
+      "q": "the thirteen virtues franklin tracked daily",
+      "bucket": "single-hop",
+      "split": "dev",
+      "expected_files": [
+        "sources/Autobiography-Franklin.md"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "franklin-habits",
+      "q": "a daily system for building good habits",
+      "bucket": "single-hop",
+      "split": "dev",
+      "expected_files": [
+        "sources/Autobiography-Franklin.md"
+      ],
+      "lang": "en"
+    },
+    {
+      "id": "xl-feared-loved-ru",
+      "q": "лучше ли правителю быть в страхе или в любви у народа",
+      "bucket": "cross-lingual",
+      "split": "holdout",
+      "expected_files": [
+        "sources/The-Prince-Machiavelli.md"
+      ],
+      "lang": "ru"
+    },
+    {
+      "id": "xl-deception-ru",
+      "q": "как обманывать врага перед сражением",
+      "bucket": "cross-lingual",
+      "split": "holdout",
+      "expected_files": [
+        "sources/Art-of-War-Sun-Tzu.md"
+      ],
+      "lang": "ru"
+    },
+    {
+      "id": "xl-control-ru",
+      "q": "принятие того, что не в нашей власти",
+      "bucket": "cross-lingual",
+      "split": "holdout",
+      "expected_files": [
+        "sources/Meditations-Marcus-Aurelius.md"
+      ],
+      "lang": "ru"
+    },
+    {
+      "id": "xl-virtues-ru",
+      "q": "тринадцать добродетелей Франклина и ежедневный учёт",
+      "bucket": "cross-lingual",
+      "split": "holdout",
+      "expected_files": [
+        "sources/Autobiography-Franklin.md"
+      ],
+      "lang": "ru"
+    },
+    {
+      "id": "xl-spies-ru",
+      "q": "использование шпионов и сбор разведданных на войне",
+      "bucket": "cross-lingual",
+      "split": "holdout",
+      "expected_files": [
+        "sources/Art-of-War-Sun-Tzu.md"
+      ],
+      "lang": "ru"
+    },
+    {
+      "id": "xl-stoicism-ru",
+      "q": "стоицизм и спокойствие духа",
+      "bucket": "cross-lingual",
+      "split": "holdout",
+      "expected_files": [
+        "sources/Meditations-Marcus-Aurelius.md"
+      ],
+      "lang": "ru"
+    },
+    {
+      "id": "na-neural-net",
+      "q": "how does gradient descent train a neural network",
+      "bucket": "no-answer",
+      "split": "holdout",
+      "expected_files": [],
+      "lang": "en"
+    },
+    {
+      "id": "na-kubernetes",
+      "q": "best practices for kubernetes horizontal autoscaling",
+      "bucket": "no-answer",
+      "split": "holdout",
+      "expected_files": [],
+      "lang": "en"
+    },
+    {
+      "id": "na-borscht-ru",
+      "q": "рецепт борща со сметаной",
+      "bucket": "no-answer",
+      "split": "holdout",
+      "expected_files": [],
+      "lang": "ru"
+    },
+    {
+      "id": "na-quantum",
+      "q": "quantum error correction with surface codes",
+      "bucket": "no-answer",
+      "split": "holdout",
+      "expected_files": [],
+      "lang": "en"
+    },
+    {
+      "id": "ics-01-en",
+      "q": "One classic treatise teaches that the supreme achievement is to break an enemy's resistance without fighting, leaning on deception and secret intelligence to do it, while another argues that war is merely the continuation of politics by other means and is always dragged down by friction and uncertainty. How do these two accounts differ on whether a commander can rely on certain knowledge, and on what ultimately decides victory in war?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "sources/Art-of-War-Sun-Tzu.md",
+        "sources/On-War-Clausewitz.md"
+      ]
+    },
+    {
+      "id": "ics-02-en",
+      "q": "An ancient general declares that all warfare is founded on deception, and a Renaissance counselor tells rulers they need not keep faith when it works against them and that mastering the craft of war must be a leader's chief study. What does each say about when deceiving one's rivals is legitimate, and how does each tie skill in war to holding on to power?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "sources/Art-of-War-Sun-Tzu.md",
+        "sources/The-Prince-Machiavelli.md"
+      ]
+    },
+    {
+      "id": "ics-03-en",
+      "q": "There is a strategic principle that against a stronger foe the wisest course is to avoid pitched battle, wear him down, and frustrate his plans rather than meet him head-on. Which Roman commander is remembered for waging exactly this patient, battle-avoiding campaign against Hannibal, and how does his conduct embody that idea?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "sources/Art-of-War-Sun-Tzu.md",
+        "sources/Plutarch-Lives.md"
+      ]
+    },
+    {
+      "id": "ics-04-ru",
+      "q": "Один мыслитель эпохи Возрождения убеждает государя, что война должна быть его главным занятием, а фундамент власти — это хорошие законы и собственное войско, ведь наёмники бесполезны и опасны. Другой, военный теоретик, доказывает, что война есть лишь продолжение политики иными средствами. Как соотносятся их взгляды на подчинённость военной силы политическим целям правителя, и что каждый говорит о том, на какие войска стоит опираться?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "sources/The-Prince-Machiavelli.md",
+        "sources/On-War-Clausewitz.md"
+      ]
+    },
+    {
+      "id": "ics-05-en",
+      "q": "A military theorist warns that there is a point beyond which further victories begin to consume the victor, draining his strength faster than they gain him. Which king became the very symbol of this, remarking after a bloody triumph that one more such victory would ruin him, and how does his campaign bear out the theorist's warning?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "sources/On-War-Clausewitz.md",
+        "sources/Plutarch-Lives.md"
+      ]
+    },
+    {
+      "id": "ics-06-ru",
+      "q": "Макиавелли утверждает, что правителю безопаснее внушать страх, чем любовь, и что опирающийся лишь на расположение народа стоит на зыбкой почве. У Плутарха есть римлянин исключительной доблести, чьё высокомерие и отказ угождать народу привели к изгнанию. Насколько его судьба подтверждает или усложняет совет Макиавелли о страхе, любви и опоре на народную приязнь?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "sources/The-Prince-Machiavelli.md",
+        "sources/Plutarch-Lives.md"
+      ]
+    },
+    {
+      "id": "ics-07-en",
+      "q": "I keep telling myself to be more honest and disciplined, but just knowing what's right hasn't actually changed my character. Is there a real method for turning good intentions into settled habits, and what kind of daily routine would actually put that into practice?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "sources/Nicomachean-Ethics-Aristotle.md",
+        "sources/Autobiography-Franklin.md"
+      ]
+    },
+    {
+      "id": "ics-08-en",
+      "q": "How should a thoughtful person come to terms with their own death — is it something you should actively rehearse and prepare your mind for, or something you simply accept as part of nature's order and stop fearing?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "sources/Meditations-Marcus-Aurelius.md",
+        "sources/Essays-Montaigne.md"
+      ]
+    },
+    {
+      "id": "ics-09-ru",
+      "q": "Насколько характер человека лепится привычкой и воспитанием, а не врождённой природой? И можно ли постоянным упражнением по-настоящему переделать дурную натуру в добрую?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "sources/Nicomachean-Ethics-Aristotle.md",
+        "sources/Essays-Bacon.md"
+      ]
+    },
+    {
+      "id": "ics-10-en",
+      "q": "Does one person's plain thrift and hard work really build lasting wealth, and how does that private habit of frugality scale up to make an entire nation richer?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "sources/Autobiography-Franklin.md",
+        "sources/Wealth-of-Nations-Smith.md"
+      ]
+    },
+    {
+      "id": "ics-11-ru",
+      "q": "Должен ли правитель быть по-настоящему добродетельным человеком, который правит по совести и долгу, или ради удержания власти важнее, чтобы его боялись и чтобы он при нужде отступал от морали? Сопоставь позицию государя-философа и прагматика.",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "sources/Meditations-Marcus-Aurelius.md",
+        "sources/The-Prince-Machiavelli.md"
+      ]
+    },
+    {
+      "id": "ics-12-en",
+      "q": "Why are people generally so bad at judging themselves accurately, and what is the wiser response — turning inward with humble skepticism about your own judgment, or shrewdly managing how you appear and your reputation to others?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "sources/Essays-Montaigne.md",
+        "sources/Essays-Bacon.md"
+      ]
+    },
+    {
+      "id": "ics-13-en",
+      "q": "Strip away sentiment and both a theorist of the all-powerful state and a hard-nosed advisor to rulers seem to land on the same conclusion: it is fear, not affection, that actually holds political authority together. How does each of them arrive at that idea, and where do they disagree about what a ruler must avoid doing even while relying on fear?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "sources/Leviathan-Hobbes.md",
+        "sources/The-Prince-Machiavelli.md"
+      ]
+    },
+    {
+      "id": "ics-14-en",
+      "q": "Two very different books both conclude that a well-ordered society must concentrate supreme authority in one place, but one justifies it by the ruler's superior knowledge of what is genuinely good, while the other justifies it by the need to escape a violent, lawless natural condition. Compare the two justifications for placing near-absolute power in a single sovereign.",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "sources/The-Republic-Plato.md",
+        "sources/Leviathan-Hobbes.md"
+      ]
+    },
+    {
+      "id": "ics-15-en",
+      "q": "One work carefully designs an ideal city that censors the poetry, stories and music its citizens may hear for the sake of their character, while another argues that silencing even a single opinion robs all of humanity. How would each respond to the other on whether a good society may suppress ideas for its people's own benefit?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "sources/The-Republic-Plato.md",
+        "sources/On-Liberty-Mill.md"
+      ]
+    },
+    {
+      "id": "ics-16-en",
+      "q": "Both a treatise on the wealth of nations and a dialogue about justice build their societies on the principle that each person should specialize in the single occupation they are naturally suited for. But they prize that specialization for completely different reasons. What does each say drives people to specialize, and what is that division of work ultimately meant to achieve?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "sources/Wealth-of-Nations-Smith.md",
+        "sources/The-Republic-Plato.md"
+      ]
+    },
+    {
+      "id": "ics-17-en",
+      "q": "How far may the state legitimately coerce a person 'for his own good'? One author grants the sovereign almost unlimited authority to secure peace and order, while another insists power over an individual is only justified to prevent harm to others. Lay out the clash between these two positions on the limits of political power over the individual.",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "sources/Leviathan-Hobbes.md",
+        "sources/On-Liberty-Mill.md"
+      ]
+    },
+    {
+      "id": "ics-18-en",
+      "q": "Both an economist explaining prosperity and a political advisor explaining power start from the same blunt assumption: people reliably act from self-interest rather than benevolence. One treats that fact as the engine of a thriving society, the other as the reason a ruler can never truly count on people's love. How does each put the very same premise about human nature to work?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "sources/Wealth-of-Nations-Smith.md",
+        "sources/The-Prince-Machiavelli.md"
+      ]
+    },
+    {
+      "id": "ics-19-en",
+      "q": "I want to actually improve my own character day by day rather than just intending to. Two of these authors each built a concrete personal practice for reviewing their conduct — one kept a little book scoring himself against a fixed list of named virtues, the other did a nightly Stoic self-reckoning and reminders addressed to himself. What was each man's method, and what specifically did each keep track of?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "sources/Autobiography-Franklin.md",
+        "sources/Meditations-Marcus-Aurelius.md"
+      ]
+    },
+    {
+      "id": "ics-20-ru",
+      "q": "Почему подчинение мнению толпы и погоня за одобрением большинства губительны для личности? Один автор называет это малодушным конформизмом, который отнимает у человека цельность, другой — тиранией большинства, подавляющей индивидуальность. Чем различаются их аргументы?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "sources/Essays-Emerson.md",
+        "sources/On-Liberty-Mill.md"
+      ]
+    },
+    {
+      "id": "ics-21-en",
+      "q": "If someone chooses to drop out and live in a deliberately stripped-down, unconventional way, how would these two authors defend that choice — one by actually going off to live simply by a pond and reporting on it, the other by arguing on principle that society has no right to press everyone into the same plan of life?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "sources/Walden-Thoreau.md",
+        "sources/On-Liberty-Mill.md"
+      ]
+    },
+    {
+      "id": "ics-22-ru",
+      "q": "Оба автора много пишут об «экономии» и о правильном отношении к деньгам и труду, но приходят почти к противоположным выводам: один проповедует трудолюбие и бережливость ради преуспеяния, другой — сокращение самих потребностей, чтобы почти не приходилось работать. Сравни их позиции и покажи, в чём напряжение.",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "sources/Autobiography-Franklin.md",
+        "sources/Walden-Thoreau.md"
+      ]
+    },
+    {
+      "id": "ics-23-en",
+      "q": "Where do these two say a person should look for stability and a sense of worth — inward, independent of what other people think? One is a Roman emperor who keeps retreating into himself, the other an essayist who preaches trusting your own mind above the world's approval. Lay out both accounts of self-sufficiency.",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "sources/Meditations-Marcus-Aurelius.md",
+        "sources/Essays-Emerson.md"
+      ]
+    },
+    {
+      "id": "ics-24-en",
+      "q": "One of these authors says the individual is really a limb of one social body who should act for the common good; the other insists there is a sphere of a person's life where he owes society nothing and must simply be left alone. How do their views of what the individual owes other people conflict?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "sources/Meditations-Marcus-Aurelius.md",
+        "sources/On-Liberty-Mill.md"
+      ]
+    },
+    {
+      "id": "ics-25-en",
+      "q": "One thinker argues that a butcher or baker serving only his own gain ends up benefiting society without intending to, while another describes how organisms all pursuing their own survival produce, over time, well-adapted forms with no designer guiding them. How do these two accounts of order emerging from individual self-interested striving compare?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "sources/Wealth-of-Nations-Smith.md",
+        "sources/Origin-of-Species-Darwin.md"
+      ]
+    },
+    {
+      "id": "ics-26-en",
+      "q": "Both a military strategist and a political philosopher describe what human life looks like when there is no overarching authority and everyone competes for advantage. How does the strategist's picture of unrestrained conflict between rival states relate to the philosopher's account of the 'war of every man against every man' in the condition lacking a common power?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "sources/Art-of-War-Sun-Tzu.md",
+        "sources/Leviathan-Hobbes.md"
+      ]
+    },
+    {
+      "id": "ics-27-en",
+      "q": "One author explains how breeders deliberately pick out the best animals to shape a domestic stock over generations, while another proposes that the rulers of an ideal city should arrange unions so that the best men and women produce offspring. How does the human breeder's methodical selection illuminate the political proposal, and where do their aims differ?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "sources/Origin-of-Species-Darwin.md",
+        "sources/The-Republic-Plato.md"
+      ]
+    },
+    {
+      "id": "ics-28-ru",
+      "q": "Почему разделение труда и специализация оказываются такими продуктивными: как объяснение выгод от разделения труда в изготовлении, скажем, булавок соотносится с идеей, что в справедливом государстве каждый человек должен делать одно дело, к которому он предрасположен по природе?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "sources/Wealth-of-Nations-Smith.md",
+        "sources/The-Republic-Plato.md"
+      ]
+    },
+    {
+      "id": "ics-29-en",
+      "q": "Two authors each explain why humans come together to form a political community, but for different reasons — one because no individual is self-sufficient and all have many mutual wants, the other because without a common power to keep them in awe life would be solitary, poor, and violent. How do the 'mutual need' and 'fear of violence' origins of the state compare?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "en",
+      "expected_files": [
+        "sources/The-Republic-Plato.md",
+        "sources/Leviathan-Hobbes.md"
+      ]
+    },
+    {
+      "id": "ics-30-ru",
+      "q": "Один автор предупреждает, что ни одна страна не выигрывала от затяжной войны и что содержание армии вдали от дома разоряет казну и народ, а другой подробно разбирает, как накапливается капитал, чем оплачивается непроизводительный труд солдат и что истощает богатство нации. Как соединить военный довод о цене длительной кампании с экономическим анализом того, откуда берутся и куда уходят средства на войну?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "sources/Art-of-War-Sun-Tzu.md",
+        "sources/Wealth-of-Nations-Smith.md"
+      ]
+    },
+    {
+      "id": "ics-31-ru",
+      "q": "Насколько оправдан обман ради цели: должен ли правитель ради удержания власти нарушать данное слово и казаться не тем, кто он есть, и как это перекликается с идеей, что всякая война построена на введении противника в заблуждение?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "sources/The-Prince-Machiavelli.md",
+        "sources/Art-of-War-Sun-Tzu.md"
+      ]
+    },
+    {
+      "id": "ics-32-ru",
+      "q": "Как правильно относиться к ударам судьбы: стоит ли активно, с напором подчинять фортуну своей воле, или мудрее спокойно принимать всё предопределённое как часть природы и не тревожиться о том, что вне нашей власти?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "sources/The-Prince-Machiavelli.md",
+        "sources/Meditations-Marcus-Aurelius.md"
+      ]
+    },
+    {
+      "id": "ics-33-ru",
+      "q": "Какие есть примеры ежедневной практики нравственного самосовершенствования — утренних и вечерних размышлений над своими поступками и одновременно системы методичного отслеживания собственных добродетелей и промахов?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "sources/Meditations-Marcus-Aurelius.md",
+        "sources/Autobiography-Franklin.md"
+      ]
+    },
+    {
+      "id": "ics-34-ru",
+      "q": "Что надёжнее для удержания власти — подавлять несогласие и держать подданных в страхе, или, наоборот, терпеть свободное выражение даже ошибочных мнений? В чём принципиально расходятся эти два взгляда?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "sources/The-Prince-Machiavelli.md",
+        "sources/On-Liberty-Mill.md"
+      ]
+    },
+    {
+      "id": "ics-35-ru",
+      "q": "Почему и полководцу, и государю опасно принимать решения в гневе, и как власть над собственными страстями и самообладание связаны с успехом в командовании людьми?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "sources/Art-of-War-Sun-Tzu.md",
+        "sources/Meditations-Marcus-Aurelius.md"
+      ]
+    },
+    {
+      "id": "ics-36-ru",
+      "q": "Почему свобода печати и открытое обсуждение противоположных мнений так важны — и с точки зрения человека, который сам издавал газету и рисковал за напечатанное, и с точки зрения пользы для всего общества?",
+      "bucket": "cross-source",
+      "split": "holdout",
+      "lang": "ru",
+      "expected_files": [
+        "sources/Autobiography-Franklin.md",
+        "sources/On-Liberty-Mill.md"
+      ]
+    }
+  ]
+}

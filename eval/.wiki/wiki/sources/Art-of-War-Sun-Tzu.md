@@ -52,7 +52,9 @@ through deception, terrain, and foreknowledge.
 ## Contrasted with
 
 - [[The-Prince-Machiavelli]] — winning through strategy and position: Sun Tzu on the battlefield, Machiavelli in politics. Both prize foreknowledge and deception over brute force.
+- [[On-War-Clausewitz]] — the other great theory of war. Sun Tzu seeks to win without fighting through foreknowledge and deception; Clausewitz centers on friction, decisive battle, and war as the continuation of policy by other means.
 
 ## See also
 
 - [[Meditations-Marcus-Aurelius]] — self-command as a commander's virtue; the general who masters himself before the field.
+- [[Plutarch-Lives]] — generalship in practice: the biographies of commanders like Alexander and Caesar are case studies in the terrain, foreknowledge, and character Sun Tzu treats in the abstract.

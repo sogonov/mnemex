@@ -29,17 +29,20 @@
 > the real cross-encoder union rerank; only the *method path* changes (`store.internal.rerank`,
 > not a fabricated public `QMDStore.rerank`). See the corrected Decision #2.
 
-> **⚠ First-measurement status (2026-07-02) — the graph tier is a HYPOTHESIS, not a result.**
-> A 4-arm ablation (A qmd hybrid · B rerank-seeds · C rerank-seeds+graph · D rerank-all;
-> `eval/run-retrieval-graph.mjs`, see `eval/BASELINE.md`) showed the typed-graph lift **does not
-> generalize** on the current corpus: on gold pairs with a hand-typed edge it added +20 pts
-> (circular — same author wrote edges and queries; p=0.25), but on **un-edged** pairs it added
-> **0.0**, and brute-force **arm D (rerank every page) beat arm C**. The corpus is only 5 pages
-> (k ≥ |corpus|), so this measures direction at best. The mechanism is built + unit-tested, but
-> the "leapfrog no competitor can copy" claim in §1/§4 is **unproven** — keep it out of any
-> external-facing material until a larger corpus + **independently-authored** edges/queries with
-> un-edged coverage isolate a real, significant B→C effect. The un-confounded demonstrated win in
-> this eval is the **cross-lingual moat** (arm A), not the graph.
+> **⚠ Measurement status (updated 2026-07-02) — graph effect now SIGNIFICANT & independent, but
+> not yet beating brute force.** A 4-arm ablation (A qmd hybrid · B rerank-seeds · C
+> rerank-seeds+graph · D rerank-all; `eval/run-retrieval-graph.mjs`, see `eval/BASELINE.md`) was
+> re-run on a **16-book / 17-page** corpus with **36 independently-authored** cross-source queries
+> (edges and queries written by separate agent pools, each blind to the other — the circularity
+> fix). Result: on **edged** pairs the graph lifts nDCG@10 **+12.8 pts, p = 0.0016** (real,
+> not self-authored); on **un-edged** pairs **Δ ≈ 0** (correct boundary — no edge, no help). BUT
+> **arm D (rerank all 17 pages) = 91.6 > C = 87.6**: at this corpus size a full rerank still edges
+> out the graph. So the graph's *lift over hybrid* is proven and significant; its *efficiency
+> advantage* (avoiding a full-corpus rerank) is **pending a much larger library** where rerank-all
+> is impractical. Honestly-scoped external claim OK: "significant recall lift over hybrid on
+> cross-source questions (p<0.01, independent eval)"; NOT yet "beats reranking the whole corpus."
+> The earlier +20 pt / p=0.25 self-authored number is superseded. The cross-lingual moat (arm A)
+> remains the other un-confounded win.
 
 **Dossier key:** D1 contextual-retrieval · D2 GraphRAG · D3 query-understanding ·
 D4 multilingual · D5 eval-methodology · D6 qmd-capability-audit · D7 competitor-exploit-list ·
