@@ -3,13 +3,14 @@
 //
 // Project Gutenberg (mnemex's unique acquisition moat) ships plain text: chapter
 // divisions are ALL-CAPS lines like `BOOK II` / `CHAPTER I.`, NOT markdown `#`
-// headings. Consequence: qmd cannot chunk heading-aware (it splits the book into
-// arbitrary ~200-word windows straight across chapter boundaries), and the
-// breadcrumb pass has nothing to anchor to. Both of mnemex's retrieval-structure
-// mechanisms are dead on its own primary source.
+// headings — so a converted book is one long structureless blob.
 //
-// This pass promotes recognizable division markers to real ATX headings so both
-// come alive. It is DELIBERATELY conservative — high precision over recall: it
+// This pass promotes recognizable division markers to real ATX headings. Its value
+// is COSMETIC / navigational: an outline-able, foldable, chaptered document you can
+// actually browse (Obsidian outline pane), instead of a 20k-line wall. A controlled
+// 3-arm test found it gives NO measurable retrieval lift (eval/BASELINE.md) — it is
+// kept because it's a deterministic, visible improvement that doesn't hurt search,
+// not because it helps recall. It is DELIBERATELY conservative — high precision: it
 // only touches standalone lines that match a tight division grammar
 // (BOOK/PART/VOLUME/CHAPTER/CANTO/LETTER/SECTION + a numeral), inside the
 // Gutenberg body (between the *** START *** / *** END *** markers when present).

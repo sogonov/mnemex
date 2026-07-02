@@ -228,9 +228,12 @@ if [ "$KEEP_BOILERPLATE" -eq 0 ] && command -v node >/dev/null 2>&1 && [ -f "$SC
 fi
 
 # ---- structure recovery (Gutenberg plain text → ATX headings) ----
-# Promote flat division markers (BOOK/PART/CHAPTER … + numeral) to real headings so
-# qmd can chunk heading-aware and the breadcrumb pass has anchors. High precision,
-# body-confined, idempotent. Opt out with --no-structure.
+# Promote flat division markers (BOOK/PART/CHAPTER … + numeral) to real headings.
+# COSMETIC/navigation only: it turns a 0-heading Gutenberg blob into a chaptered,
+# outline-able document (Obsidian outline pane, folding). The 3-arm test found NO
+# retrieval benefit (see eval/BASELINE.md) — kept on because it's a deterministic,
+# visible improvement that doesn't hurt retrieval, not because it lifts recall.
+# High precision, body-confined, idempotent. Opt out with --no-structure.
 if [ "$NO_STRUCTURE" -eq 0 ] && command -v node >/dev/null 2>&1 && [ -f "$SCRIPT_DIR/structure.mjs" ]; then
   log "Recovering heading structure (--no-structure to skip)"
   node "$SCRIPT_DIR/structure.mjs" "$OUT_DIR/book.md" || log "structure pass skipped (non-fatal)"
