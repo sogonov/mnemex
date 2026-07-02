@@ -37,6 +37,7 @@ USE_MARKER=0
 FORCE_OCR=0
 KEEP_INTERMEDIATE=0
 NO_BREADCRUMB=0
+NO_STRUCTURE=0
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -44,6 +45,7 @@ while [ "$#" -gt 0 ]; do
     --ocr)    FORCE_OCR=1 ;;
     --keep)   KEEP_INTERMEDIATE=1 ;;
     --no-breadcrumb) NO_BREADCRUMB=1 ;;
+    --no-structure)  NO_STRUCTURE=1 ;;
     *) echo "Unknown option: $1"; exit 1 ;;
   esac
   shift
@@ -188,6 +190,16 @@ case "$EXT_LOWER" in
     exit 1
     ;;
 esac
+
+# ---- structure recovery (Gutenberg plain text → ATX headings) ----
+# Promote flat division markers (BOOK/PART/CHAPTER … + numeral) to real headings so
+# qmd can chunk heading-aware and the breadcrumb pass has anchors. High precision,
+# body-confined, idempotent. Runs first (before breadcrumb + before any provenance
+# token exists). Opt out with --no-structure.
+if [ "$NO_STRUCTURE" -eq 0 ] && command -v node >/dev/null 2>&1 && [ -f "$SCRIPT_DIR/structure.mjs" ]; then
+  log "Recovering heading structure (--no-structure to skip)"
+  node "$SCRIPT_DIR/structure.mjs" "$OUT_DIR/book.md" || log "structure pass skipped (non-fatal)"
+fi
 
 # ---- contextual breadcrumbs (Contextual Retrieval, conversion-time) ----
 # Inject ancestor-path breadcrumbs under nested headings so deep chunks stay
