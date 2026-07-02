@@ -123,9 +123,17 @@ When a new file appears in `raw/` (or the owner asks you to ingest something):
 3. **Create a source page** in `wiki/sources/` using `templates/source.md`. Fill in: bibliographic meta (**read `raw/books/<slug>/meta.yaml` — it's auto-filled from the source header; copy it, only research what's blank**), TOC, chapter-by-chapter summary, list of extracted claims **each with a `^[raw-path:Lstart-Lend]` provenance token** (see **Provenance** above — this is mandatory, lint enforces it), list of key entities and concepts mentioned (as wikilinks).
 4. **Update or create entity pages** for people, books, companies, tools mentioned. Use `templates/entity.md`.
 5. **Update or create concept pages** for ideas, patterns, frameworks. Use `templates/concept.md`. **Before creating a new concept page, search `index.md` and all `aliases:` fields for synonyms.** If a similar concept exists, extend the existing page or add an alias rather than creating a duplicate.
-6. **Update `index.md`** — add new pages to their category section.
-7. **Append a log entry** to `log.md` with format `## [YYYY-MM-DD HH:MM] ingest | <source title>` followed by a one-line summary and list of pages touched.
-8. **Verify your own claims against the source.** Before you build anything on top of the new
+6. **Discover the connections you missed.** You just linked what you *recalled* — but a new source
+   belongs in the graph next to pages you didn't reread. Run `node scripts/suggest-links.mjs`
+   (or `mnemex suggest-links`) on the new/changed pages: it asks the qmd index which existing pages
+   each one is most related to **but doesn't yet link**, and prints a scored candidate worklist.
+   **Triage it** — for each genuine connection, read both pages and file it under the right typed
+   section (`## Builds on` / `## Subsumes` / `## Contrasted with` / `## Contradicts` / `## See also`);
+   drop the off-topic ones. This is connection *discovery* — the one thing single-pass memory can't do
+   (see **Discovering connections** below). The script only suggests; **you** decide the type.
+7. **Update `index.md`** — add new pages to their category section.
+8. **Append a log entry** to `log.md` with format `## [YYYY-MM-DD HH:MM] ingest | <source title>` followed by a one-line summary and list of pages touched.
+9. **Verify your own claims against the source.** Before you build anything on top of the new
    claims, check that they say what the source says. Run `node scripts/verify-claims.mjs`
    (or `mnemex verify`) — it slices the exact cited raw lines next to each claim. **Do the judgment
    with fresh context** (spawn a sub-agent, or re-read cold): for each row, does the cited passage
@@ -133,8 +141,8 @@ When a new file appears in `raw/` (or the owner asks you to ingest something):
    unsupported/overreaching claim with a `> [!caution] Unverified — cited lines don't support this`
    callout and fix or cut it. This is the semantic gate above lint (see **Verify** below); it's how
    the wiki stays trustworthy without a human re-reading every ingest.
-9. **Flag contradictions.** If a new source conflicts with an existing claim, add a `> [!warning] Contradiction` / `> [!warning] Tension` / `> [!note] Composition` callout (whichever fits) on the relevant page, naming both sides with citations and a boundary-conditioned `Resolution:` line. Never silently overwrite. See **Contradictions & tensions** below.
-10. **Refresh `hot.md`.** Update the ~500-word rolling orientation file: what was just ingested, which threads it opened or closed, what to read next. This is cheap cross-session memory (see **Schema layer**).
+10. **Flag contradictions.** If a new source conflicts with an existing claim, add a `> [!warning] Contradiction` / `> [!warning] Tension` / `> [!note] Composition` callout (whichever fits) on the relevant page, naming both sides with citations and a boundary-conditioned `Resolution:` line. Never silently overwrite. See **Contradictions & tensions** below.
+11. **Refresh `hot.md`.** Update the ~500-word rolling orientation file: what was just ingested, which threads it opened or closed, what to read next. This is cheap cross-session memory (see **Schema layer**).
 
 A single ingest typically touches **10–15 wiki pages**. That's correct — it's the bookkeeping you exist to do.
 
@@ -247,6 +255,26 @@ When linking concepts, prefer typed sections over bare wikilinks. Conventions:
 - `## Contradicts` — the linked source disagrees with claims on this page.
 
 This is the fix for the "Similar, contains, contradicts — all collapsed into one word" problem from the gist comments.
+
+### Discovering connections (don't rely on memory)
+
+Typed sections fix *how* you link. This fixes *what you forget to link*. The value of a compounding
+library is that a new source lands next to everything it relates to — but on a single reading pass you
+only link the pages you happened to recall. The pages you didn't reread stay disconnected ("islands"),
+and the graph is only as good as your memory.
+
+`scripts/suggest-links.mjs` (or `mnemex suggest-links`) closes that gap with the search index you
+already have: for a page, it runs a compact query (title + lead) against the wiki collection via qmd,
+and lists the existing pages it's most related to **but doesn't yet link** — scored, already-linked
+targets excluded. Run it as **ingest step 6** on every new/changed page, and any time you sense a page
+is under-connected.
+
+**It suggests; you decide.** A high score means *similar*, which is not the same as *should-link* —
+so triage: read both pages, and only file a candidate under a typed section if there's a real
+`Builds-on` / `Subsumes` / `Contrasted-with` / `Contradicts` / `See-also` relationship. Drop the rest.
+This is the one linking move pure prose can't do — it surfaces the connection from the *whole corpus*,
+not just what you reread. Honest scope: this is connection **discovery** for a richer, more navigable
+graph — not a proven retrieval-recall lever (see `docs/methodology/linking-core-study.md`).
 
 ---
 

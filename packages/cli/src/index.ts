@@ -7,6 +7,7 @@ import { setupSearch, reindex, search } from "./search.js";
 import { lint } from "./lint.js";
 import { verify } from "./verify.js";
 import { cleanRaw } from "./clean.js";
+import { suggestLinks } from "./suggest.js";
 
 const program = new Command();
 
@@ -84,5 +85,15 @@ program
   .option("--breadcrumb", "Also inject contextual breadcrumbs (off by default — no measured retrieval benefit)")
   .option("--no-meta", "Don't auto-fill meta.yaml from the Gutenberg header")
   .action((opts) => cleanRaw(opts));
+
+program
+  .command("suggest-links [pages...]")
+  .description("Suggest link candidates (via qmd) each page is related to but doesn't yet link")
+  .option("--wiki <path>", "Wiki root path")
+  .option("--collection <name>", "qmd collection to search (default mnemex-wiki)")
+  .option("--n <k>", "Max candidates per page (default 8)")
+  .option("--min-score <s>", "Score floor to cut noise (default 0.4)")
+  .option("--json", "Emit as JSON")
+  .action((pages, opts) => suggestLinks(opts, pages));
 
 program.parseAsync(process.argv);

@@ -238,21 +238,24 @@ function selftest() {
   return fail;
 }
 
-// ---- entry ----------------------------------------------------------------
+// ---- entry (only when run directly, NOT when imported) --------------------
 
-if (process.argv.includes("--selftest")) {
-  process.exit(selftest() ? 1 : 0);
-}
-const argv = process.argv.slice(2);
-let wikiRoot = process.env.WIKI_ROOT || process.cwd();
-let asJson = false, strict = false;
-for (let i = 0; i < argv.length; i++) {
-  if (argv[i] === "--wiki") wikiRoot = argv[++i];
-  else if (argv[i] === "--json") asJson = true;
-  else if (argv[i] === "--strict") strict = true;
-  else if (argv[i] === "-h" || argv[i] === "--help") {
-    console.log("usage: node scripts/lint-links.mjs [--wiki <path>] [--json] [--strict]");
-    process.exit(0);
+// ESM runs an imported module top-to-bottom — gate the CLI so importing
+// extractWikiLinks/isPageLink (e.g. from suggest-links.mjs) can't trigger a wiki
+// scan + process.exit. See structure.mjs.
+if (/(^|\/)lint-links\.mjs$/.test(process.argv[1] || "")) {
+  if (process.argv.includes("--selftest")) process.exit(selftest() ? 1 : 0);
+  const argv = process.argv.slice(2);
+  let wikiRoot = process.env.WIKI_ROOT || process.cwd();
+  let asJson = false, strict = false;
+  for (let i = 0; i < argv.length; i++) {
+    if (argv[i] === "--wiki") wikiRoot = argv[++i];
+    else if (argv[i] === "--json") asJson = true;
+    else if (argv[i] === "--strict") strict = true;
+    else if (argv[i] === "-h" || argv[i] === "--help") {
+      console.log("usage: node scripts/lint-links.mjs [--wiki <path>] [--json] [--strict]");
+      process.exit(0);
+    }
   }
+  run(resolve(wikiRoot), { asJson, strict });
 }
-run(resolve(wikiRoot), { asJson, strict });
