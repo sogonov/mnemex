@@ -88,6 +88,14 @@ Ruthless scoping is the point: "merge everything" kills solo projects. Ship each
   Features ship justified **structurally** (heading-aware chunking + breadcrumb + navigation +
   chapter-anchored provenance), NOT on a recall number. A clean measurement needs a different
   design (chunk-boundary purity). NOT a relaunch headline.
+- [x] **Gutenberg boilerplate strip.** `scripts/strip-boilerplate.mjs` drops the license header +
+  footer bracketing every Gutenberg text (`*** START *** / *** END ***`). **Measured, deterministic,
+  trustworthy** (no flaky retrieval): ~385 lines/book, **6,195 total** across the 16-book corpus,
+  gone from the index — identical legal text that was surfacing as retrieval noise and matching
+  every book at once. Runs FIRST in `ingest-book.sh` (before structure/breadcrumb) so every
+  `^[raw:L-L]` line number is boilerplate-free from the start. No-op on non-Gutenberg sources;
+  idempotent; opt out `--keep-boilerplate`. Conversion pipeline is now:
+  convert → strip-boilerplate → structure → breadcrumb → meta.
 - [x] **Reranking** — already delivered by qmd (qwen3-reranker); confirmed the dominant lever. Nothing to build.
 - [x] **Cross-lingual moat** — proven (RU→EN ≈83%), no build needed.
 - 🅿️ **Typed-graph retrieval** — parked R&D (eval-only, unproven; see Progress section). Not a phase deliverable.

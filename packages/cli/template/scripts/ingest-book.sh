@@ -38,6 +38,7 @@ FORCE_OCR=0
 KEEP_INTERMEDIATE=0
 NO_BREADCRUMB=0
 NO_STRUCTURE=0
+KEEP_BOILERPLATE=0
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -46,6 +47,7 @@ while [ "$#" -gt 0 ]; do
     --keep)   KEEP_INTERMEDIATE=1 ;;
     --no-breadcrumb) NO_BREADCRUMB=1 ;;
     --no-structure)  NO_STRUCTURE=1 ;;
+    --keep-boilerplate) KEEP_BOILERPLATE=1 ;;
     *) echo "Unknown option: $1"; exit 1 ;;
   esac
   shift
@@ -190,6 +192,16 @@ case "$EXT_LOWER" in
     exit 1
     ;;
 esac
+
+# ---- strip Project Gutenberg license boilerplate ----
+# Drop the ~25-line license header + long license footer that bracket every
+# Gutenberg text (delimited by *** START *** / *** END *** markers). Runs FIRST so
+# all downstream line numbers — and every ^[raw:L-L] provenance token — are clean.
+# No markers (non-Gutenberg source) → no-op. Opt out with --keep-boilerplate.
+if [ "$KEEP_BOILERPLATE" -eq 0 ] && command -v node >/dev/null 2>&1 && [ -f "$SCRIPT_DIR/strip-boilerplate.mjs" ]; then
+  log "Stripping Project Gutenberg boilerplate (--keep-boilerplate to skip)"
+  node "$SCRIPT_DIR/strip-boilerplate.mjs" "$OUT_DIR/book.md" || log "strip-boilerplate skipped (non-fatal)"
+fi
 
 # ---- structure recovery (Gutenberg plain text → ATX headings) ----
 # Promote flat division markers (BOOK/PART/CHAPTER … + numeral) to real headings so
