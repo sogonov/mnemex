@@ -34,14 +34,16 @@ import { readFileSync, writeFileSync, existsSync } from "node:fs";
 const CRUMB = /^\*↪ .*\*\s*$/;
 const SEP = " › ";
 
-// Strip any previously-injected breadcrumb lines (and the blank line we add after).
+// Strip any previously-injected breadcrumb lines. breadcrumbMarkdown inserts a
+// blank line then the crumb directly after a heading; it does NOT insert a blank
+// AFTER the crumb — so remove only the crumb and its preceding inserted blank,
+// leaving the section's own following blank intact (else re-runs eat blank lines).
 export function stripBreadcrumbs(text) {
   const out = [];
   const lines = text.split(/\r?\n/);
   for (let i = 0; i < lines.length; i++) {
     if (CRUMB.test(lines[i])) {
       if (out.length && out[out.length - 1] === "") out.pop(); // drop the blank we inserted before
-      if (i + 1 < lines.length && lines[i + 1] === "") i++;     // and the blank after
       continue;
     }
     out.push(lines[i]);

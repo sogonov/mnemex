@@ -103,6 +103,14 @@ Ruthless scoping is the point: "merge everything" kills solo projects. Ship each
   `meta.yaml` shipped empty for the owner to type by hand. Main-module gated, `--json` mode, selftest.
   Conversion pipeline is now:
   convert → **meta stub → extract-meta** → strip-boilerplate → structure → breadcrumb.
+- [x] **`mnemex clean-raw` — retrofit the pipeline onto already-ingested books.** The four passes
+  only ran at ingest, so books converted earlier never got them. `scripts/clean-raw.mjs` imports the
+  passes' pure functions (import-safe thanks to the main-module guards) and applies the same order to
+  every `raw/books/*/book.md`; `--dry-run`, per-book delta report, per-pass opt-outs. Wired as
+  `mnemex clean-raw`; `init` bundles it. **End-to-end validated on the real 16-book corpus**: −6,211
+  boilerplate lines, +552 headings, meta filled 16/16, and **idempotent** (second run touches 0/16 —
+  verified by md5). Caught + fixed a real breadcrumb idempotency bug en route (`stripBreadcrumbs` ate
+  the section's own blank line, so repeated runs slowly mangled formatting).
 - [x] **Reranking** — already delivered by qmd (qwen3-reranker); confirmed the dominant lever. Nothing to build.
 - [x] **Cross-lingual moat** — proven (RU→EN ≈83%), no build needed.
 - 🅿️ **Typed-graph retrieval** — parked R&D (eval-only, unproven; see Progress section). Not a phase deliverable.

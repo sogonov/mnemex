@@ -6,6 +6,7 @@ import { mcpInstall, mcpStatus } from "./mcp.js";
 import { setupSearch, reindex, search } from "./search.js";
 import { lint } from "./lint.js";
 import { verify } from "./verify.js";
+import { cleanRaw } from "./clean.js";
 
 const program = new Command();
 
@@ -72,5 +73,16 @@ program
   .option("--json", "Emit worksheet as JSON")
   .option("--page <rel>", "Limit to one page (e.g. sources/DDD-Evans.md)")
   .action((opts) => verify(opts));
+
+program
+  .command("clean-raw")
+  .description("Retrofit the conversion pipeline (strip boilerplate, recover structure, breadcrumbs, metadata) onto already-ingested books")
+  .option("--wiki <path>", "Wiki root path")
+  .option("--dry-run", "Report what would change without writing")
+  .option("--keep-boilerplate", "Don't strip Project Gutenberg license text")
+  .option("--no-structure", "Don't promote division markers to headings")
+  .option("--no-breadcrumb", "Don't inject contextual breadcrumbs")
+  .option("--no-meta", "Don't auto-fill meta.yaml from the Gutenberg header")
+  .action((opts) => cleanRaw(opts));
 
 program.parseAsync(process.argv);
