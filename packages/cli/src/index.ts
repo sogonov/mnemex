@@ -5,6 +5,7 @@ import { doctor } from "./doctor.js";
 import { mcpInstall, mcpStatus } from "./mcp.js";
 import { setupSearch, reindex, search } from "./search.js";
 import { lint } from "./lint.js";
+import { verify } from "./verify.js";
 
 const program = new Command();
 
@@ -63,5 +64,13 @@ program
   .option("--json", "Emit findings as JSON")
   .option("--strict", "Fail on orphan pages too (advisory by default)")
   .action((opts) => lint(opts));
+
+program
+  .command("verify")
+  .description("Claim-verification worksheet: pair each claim with its exact cited raw lines")
+  .option("--wiki <path>", "Wiki root path")
+  .option("--json", "Emit worksheet as JSON")
+  .option("--page <rel>", "Limit to one page (e.g. sources/DDD-Evans.md)")
+  .action((opts) => verify(opts));
 
 program.parseAsync(process.argv);

@@ -77,9 +77,12 @@ Ruthless scoping is the point: "merge everything" kills solo projects. Ship each
 - [x] **Cross-lingual moat** — proven (RU→EN ≈83%), no build needed.
 - 🅿️ **Typed-graph retrieval** — parked R&D (eval-only, unproven; see Progress section). Not a phase deliverable.
 
-> Update 2026-07-02 (session 2): Phase 3a **Lint as code** shipped (details below). Next: review-queue slice.
+> Update 2026-07-02 (session 2): Phase 3 shipped both slices — **Lint as code** (3a) + **Fresh-context
+> claim verifier** (3b, replaced the review-queue after deciding a manual gate is dead code for a solo
+> tool). Details below. Phase 3 DONE. Next candidates: Phase 2b breadcrumb (small), grow the real library,
+> or relaunch prep with the honest numbers.
 
-### Phase 3 — curation robustness (IN PROGRESS)
+### Phase 3 — curation robustness (DONE)
 - [x] **Lint as code** — `scripts/lint-links.mjs` (~230 LOC w/ selftest): **BROKEN** `[[links]]`
   (unresolved by basename or alias), **DUPLICATE** names (one basename/alias owned by 2+ pages — the
   ambiguous-`[[link]]` / "same concept, two names" trap), **ORPHAN** pages (no inbound link; advisory,
@@ -90,7 +93,17 @@ Ruthless scoping is the point: "merge everything" kills solo projects. Ship each
   corpus it caught a real ambiguous alias (`Essays` shared by Bacon/Emerson/Montaigne). CLAUDE.md Lint
   section updated: broken/orphan/exact-duplicate moved from judgment-lint → code-lint; judgment-lint
   keeps only the fuzzy calls (near-duplicates, implicit concepts, stale claims, contradictions).
-- [ ] **Review queue** (slice): verbatim-body staging → human approve/reject before pages land in `wiki/`. Reference: `llm-wiki-compiler/src/commands/review-*.ts`. Take the small staging+policy slice, not the full concurrent-lock machinery.
+- [x] **Fresh-context claim verifier** (replaced the review-queue). Decision: a *manual* approve/reject
+  queue is dead code for a solo tool — nobody gates their own ingests. The competitor split confirms it:
+  llmwiki keeps a manual queue only because its compiler writes pages with **no human in the loop**;
+  claude-obsidian dropped manual staging for an **automated fresh-context verifier**. mnemex already has
+  the human at ingest step 2, so it needs the auto-verifier, not the queue. Built `scripts/verify-claims.mjs`
+  (~180 LOC w/ selftest): for every claim carrying a `^[raw:L-L]` token it slices the **exact** cited raw
+  lines and prints a worksheet pairing claim ↔ what the source literally says. It does **not** judge — a
+  fresh-context sub-agent does (CLAUDE.md ingest step 8), flagging unsupported claims with
+  `> [!caution] Unverified`. Semantic layer above lint (lint = token *resolves*; verify = lines *support*).
+  Wired into `mnemex verify` (`--page`, `--json`); `init` bundles it; fence-aware, `\p{L}`-safe. Declined
+  llmwiki's staging queue + TOCTOU lock (bloat trap per strategy doc §6).
 
 ### Skip (low value for this project)
 - d3 web viewer (Obsidian already renders the graph), export formats (llms.txt/Marp/GraphML), multi-agent orchestration / hooks.

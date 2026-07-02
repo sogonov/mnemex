@@ -125,8 +125,16 @@ When a new file appears in `raw/` (or the owner asks you to ingest something):
 5. **Update or create concept pages** for ideas, patterns, frameworks. Use `templates/concept.md`. **Before creating a new concept page, search `index.md` and all `aliases:` fields for synonyms.** If a similar concept exists, extend the existing page or add an alias rather than creating a duplicate.
 6. **Update `index.md`** — add new pages to their category section.
 7. **Append a log entry** to `log.md` with format `## [YYYY-MM-DD HH:MM] ingest | <source title>` followed by a one-line summary and list of pages touched.
-8. **Flag contradictions.** If a new source conflicts with an existing claim, add a `> [!warning] Contradiction` / `> [!warning] Tension` / `> [!note] Composition` callout (whichever fits) on the relevant page, naming both sides with citations and a boundary-conditioned `Resolution:` line. Never silently overwrite. See **Contradictions & tensions** below.
-9. **Refresh `hot.md`.** Update the ~500-word rolling orientation file: what was just ingested, which threads it opened or closed, what to read next. This is cheap cross-session memory (see **Schema layer**).
+8. **Verify your own claims against the source.** Before you build anything on top of the new
+   claims, check that they say what the source says. Run `node scripts/verify-claims.mjs`
+   (or `mnemex verify`) — it slices the exact cited raw lines next to each claim. **Do the judgment
+   with fresh context** (spawn a sub-agent, or re-read cold): for each row, does the cited passage
+   *support* the claim, or did you paraphrase something the source never states? Flag every
+   unsupported/overreaching claim with a `> [!caution] Unverified — cited lines don't support this`
+   callout and fix or cut it. This is the semantic gate above lint (see **Verify** below); it's how
+   the wiki stays trustworthy without a human re-reading every ingest.
+9. **Flag contradictions.** If a new source conflicts with an existing claim, add a `> [!warning] Contradiction` / `> [!warning] Tension` / `> [!note] Composition` callout (whichever fits) on the relevant page, naming both sides with citations and a boundary-conditioned `Resolution:` line. Never silently overwrite. See **Contradictions & tensions** below.
+10. **Refresh `hot.md`.** Update the ~500-word rolling orientation file: what was just ingested, which threads it opened or closed, what to read next. This is cheap cross-session memory (see **Schema layer**).
 
 A single ingest typically touches **10–15 wiki pages**. That's correct — it's the bookkeeping you exist to do.
 
@@ -184,6 +192,29 @@ Run it at the end of every ingest and fix what it reports.
 - For each **orphan** `lint-links` flags, decide per page: delete, integrate, or accept (a fresh stub
   legitimately has no inbound links yet).
 - Report findings as a list. Don't fix without owner approval.
+
+### Verify (does the source actually support the claim?)
+
+Lint proves a provenance token *resolves* — the raw file exists, the line range is in bounds. It
+cannot prove the cited lines *support* the claim; that's a semantic judgment. `verify-claims.mjs`
+closes the gap **without a human re-reading every ingest** and **without you re-reading the whole
+book** (which is how paraphrase-drift and fabrication creep back in):
+
+`node scripts/verify-claims.mjs` (or `mnemex verify`) walks every claim in `wiki/sources/` and
+`wiki/syntheses/` that carries a `^[raw:Lstart-Lend]` token, slices the **exact** cited lines out of
+the immutable raw source, and prints a worksheet pairing each claim with what the source literally
+says there. It does **not** judge — it hands you un-fakeable text to judge against.
+
+**The judgment must be fresh-context.** Don't verify with the same context that wrote the claims —
+you'll rubber-stamp your own paraphrase. Spawn a sub-agent (or re-read cold) and, for each worksheet
+row, decide: do the cited lines support the claim as stated? Flag every miss with a
+`> [!caution] Unverified — cited lines don't support this` callout on the page, then fix or cut it.
+Run it as **step 8 of every ingest** (see **Ingest** above) and whenever the owner asks to verify a
+page (`mnemex verify --page sources/<Name>.md`). Rows that print `⚠ raw missing / out-of-range` are a
+lint failure first — run `mnemex lint` and fix the token before verifying.
+
+This is the "fresh-context verifier" (proven by claude-obsidian) in mnemex's idiom: a deterministic
+script does the mechanical slicing, the judgment stays in prose where the intelligence lives.
 
 ---
 
