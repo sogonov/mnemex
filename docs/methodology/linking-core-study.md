@@ -51,6 +51,33 @@ judges with fresh context" contract. **Never writes edges itself.** ~90 LOC, zer
 This is the single change that most strengthens the core: it converts connection-building from pure
 single-pass recall into **retrieval-assisted recall**, using infrastructure already paid for.
 
+## Measured results (2026-07-03) — precision, coverage, latency
+
+Built, then **measured** on the real 615-page `brain-wiki` (not asserted). Candidates generated for a
+deterministic 40-page sample; each candidate judged **should-link yes/no by a strict independent agent
+(one per source page, blind to the score)** that read both pages and required a genuine typed
+relationship, not same-topic proximity.
+
+| metric | value | note |
+|---|---|---|
+| **Precision** | **73%** (33/45 candidates) | ~3 of 4 suggestions are genuine missed links; the agent gates the rest |
+| by score band | 0.40–0.45 → 76% · 0.45+ → 70% | **score does NOT discriminate above the floor** — raising min-score wouldn't help; 0.4 is right |
+| **Coverage** | **21/40 pages** get ≥1 candidate (~1.1/page) | sparse by design — doesn't flood; ~half the pages get nothing (niche or already well-linked) |
+| **Latency** | **~15s/page** (qmd rerank on CPU) | an ingest of 10–15 pages spends 2.5–4 min here — a real cost, not "instant" |
+
+The 27% false positives are honest and obvious on reading: title coincidences (`Adam-Wathan` →
+`Martin-Fowler`, "superficial Refactoring word-match"), same-broad-topic (`Bronze-Silver-Gold` →
+`Stability-Patterns`, "different subdomain"), metaphorical ties (`DORA` → `Validated-Learning`). All
+the kind a human rejects in one glance — which is exactly the propose-agent-gates contract.
+
+**Honest confidence:** the suggester is now *measured*, not hoped — 73% precision, sparse, ~15s/page.
+It genuinely surfaces missed connections; it is not perfect and not fast. Earlier "~2s/page" was a
+wrong extrapolation from a single warm query; the real batch cost is ~15s/page.
+
+> **Correction note.** An earlier version of this doc / the script header claimed "~2s/page warm."
+> That was extrapolated from one back-to-back warm query and is wrong — the measured per-page cost in
+> a real batch is ~15s. Latency is a genuine cost to weigh, not a footnote.
+
 ## What the adversarial pass CUT (and why) — read before building
 
 The first design bundled 6 steps; verification returned `holds: false`. Rejections stand:

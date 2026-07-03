@@ -14,16 +14,22 @@
 // cannot: link two related pages that never spell each other's name. And it is the
 // discovery engine claude-obsidian's prose fan-out quota lacks.
 //
-// Validated parameters (see docs/methodology/linking-core-study.md):
-//   - query = COMPACT (title + ~400-char lead), NOT the whole body — sharper + faster.
-//   - reranker ON — surfaces the right neighbors (Entity/Value-Object, not "aggregate"
-//     word-matches); warm cost ≈ 2s/page, so ALL target pages run in ONE session
-//     (one model load, then ~2s each) rather than a cold process per page.
-//   - min-score ≈ 0.4 default (relevant cluster ~0.44–0.93; noise below ~0.40).
+// MEASURED on the real 615-page brain-wiki (see docs/methodology/linking-core-study.md):
+//   - PRECISION 73% — 33/45 suggested candidates were judged genuine "should-link" by
+//     strict independent agents blind to the score. The agent gates the ~27% obvious
+//     false positives (title coincidences, same-broad-topic). Score does NOT discriminate
+//     above the floor (0.40–0.45 band = 76%, 0.45+ = 70%), so 0.4 is the right threshold.
+//   - SPARSE, doesn't flood: only ~half the pages get any candidate (~1.1/page) — the
+//     rest are niche or already well-linked.
+//   - query = COMPACT (title + ~400-char lead), NOT the whole body — sharper candidates.
+//   - reranker ON. Cost ≈ 15s/page (qmd rerank on CPU); an ingest touching 10–15 pages
+//     spends 2.5–4 min here. Not instant — a real cost to weigh. All pages run in ONE
+//     session so the model loads once.
+//   - min-score ≈ 0.4 default.
 //
-// HONEST SCOPE: this is connection-DISCOVERY for navigation/synthesis — NOT a proven
+// HONEST SCOPE: connection-DISCOVERY for a richer/navigable graph — NOT a proven
 // retrieval-recall lever (mnemex's own eval marks the typed graph not-significant at
-// scale). It suggests; the agent still reads and types every accepted edge.
+// scale). It suggests; the agent reads both pages and types every accepted edge.
 //
 // Usage:
 //   node scripts/suggest-links.mjs [--wiki <path>] [--collection mnemex-wiki]

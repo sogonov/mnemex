@@ -273,8 +273,13 @@ is under-connected.
 so triage: read both pages, and only file a candidate under a typed section if there's a real
 `Builds-on` / `Subsumes` / `Contrasted-with` / `Contradicts` / `See-also` relationship. Drop the rest.
 This is the one linking move pure prose can't do — it surfaces the connection from the *whole corpus*,
-not just what you reread. Honest scope: this is connection **discovery** for a richer, more navigable
-graph — not a proven retrieval-recall lever (see `docs/methodology/linking-core-study.md`).
+not just what you reread.
+
+Measured on a 615-page wiki (`docs/methodology/linking-core-study.md`): **~73% of suggestions are
+genuine should-links** (you reject the rest — title coincidences, same-topic-not-related), it's
+**sparse** (~half of pages get nothing — that's fine, their neighbors are already linked), and it
+costs **~15s/page** (an ingest spends a few minutes here). Honest scope: connection **discovery** for
+a richer, navigable graph — not a proven retrieval-recall lever.
 
 ---
 
