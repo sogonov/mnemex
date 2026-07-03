@@ -182,9 +182,12 @@ When the owner asks for lint, or proactively after every ~20 ingests:
   is out of bounds.
 - `scripts/lint-links.mjs` — wikilink integrity across all of `wiki/`: **broken** `[[links]]`
   (resolve to no page, by basename or alias), **duplicate** names (one basename/alias owned by 2+
-  pages — an ambiguous `[[link]]` target, the "same concept under two names" trap), and **orphan**
-  pages (no inbound link from another page). Fence-aware, alias-aware, Unicode-safe (Cyrillic titles
-  resolve). Orphans are advisory (exit 0); `--strict` fails on them too.
+  pages — an ambiguous `[[link]]` target, the "same concept under two names" trap), **orphan**
+  pages (no inbound link from another page), and **untyped** pages (3+ wikilinks but no typed
+  relationship section — relationships all buried in prose, the "everything is related" trap; a
+  cosmetic/consistency nudge toward `## See also` / `Builds on` / `Subsumes` / `Contrasted with` /
+  `Contradicts`). Fence-aware, alias-aware, Unicode-safe (Cyrillic titles resolve). Orphan + untyped
+  are advisory (exit 0); `--strict` fails on them too.
 
 `mnemex lint` exits non-zero on any hard finding (broken/duplicate; orphans only under `--strict`).
 Run it at the end of every ingest and fix what it reports.

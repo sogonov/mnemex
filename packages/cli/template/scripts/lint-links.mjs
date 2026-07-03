@@ -53,6 +53,14 @@ export function isPageLink(target) {
   return true;
 }
 
+// A typed relationship section (the convention from CLAUDE.md > Relationships).
+// A page with links but none of these files all its relationships in prose — the
+// "everything is related" trap. Cosmetic/consistency check, not retrieval.
+const TYPED_SECTION = /^#{2,}\s+(see also|builds on|subsumes|contrasted with|contradicts|referenced by)\b/i;
+export function hasTypedSection(text) {
+  return text.split(/\r?\n/).some((l) => TYPED_SECTION.test(l));
+}
+
 // Extract [[wikilink]] targets from markdown, skipping YAML frontmatter, fenced
 // code blocks (``` / ~~~), and inline `code` spans. Returns [{ target, line }]
 // where target is the page part (without #heading or |display), 1-based line.
@@ -131,6 +139,7 @@ function run(wikiRoot, { asJson, strict }) {
   // name-key -> Set<page> (basename + every alias), for resolution + duplicates.
   const keyToPages = new Map();
   const aliasesOf = new Map();
+  const textOf = new Map();
   const addKey = (k, file) => {
     const nk = normKey(k);
     if (!nk) return;
@@ -139,6 +148,7 @@ function run(wikiRoot, { asJson, strict }) {
   for (const f of pages) {
     const base = f.slice(f.lastIndexOf("/") + 1).replace(/\.md$/, "");
     const text = readFileSync(f, "utf8");
+    textOf.set(f, text);
     const aliases = parseAliases(text);
     aliasesOf.set(f, aliases);
     addKey(base, f);
@@ -175,8 +185,18 @@ function run(wikiRoot, { asJson, strict }) {
   // ORPHAN: a page nothing else links to (advisory).
   for (const f of pages) if (!referenced.has(f)) flag(f, 1, "ORPHAN", "no inbound wikilink from any other page");
 
+  // UNTYPED (advisory, cosmetic): a page relates to 3+ pages but files none of them
+  // under a typed relationship section — its relationships are all buried in prose.
+  for (const f of pages) {
+    const text = textOf.get(f);
+    const distinct = new Set(extractWikiLinks(text).filter((l) => isPageLink(l.target)).map((l) => normKey(l.target)));
+    if (distinct.size >= 3 && !hasTypedSection(text))
+      flag(f, 1, "UNTYPED", `${distinct.size} wikilinks but no typed relationship section (## See also / Builds on / Subsumes / Contrasted with / Contradicts)`);
+  }
+
   const hard = findings.filter((f) => f.level === "BROKEN" || f.level === "DUPLICATE");
-  const fail = hard.length > 0 || (strict && findings.some((f) => f.level === "ORPHAN"));
+  const advisory = (f) => f.level === "ORPHAN" || f.level === "UNTYPED";
+  const fail = hard.length > 0 || (strict && findings.some(advisory));
 
   if (asJson) {
     console.log(JSON.stringify({ wikiRoot, scanned: pages.length, findings }, null, 2));
@@ -184,8 +204,8 @@ function run(wikiRoot, { asJson, strict }) {
   }
 
   const RED = "\x1b[0;31m", YEL = "\x1b[1;33m", GRN = "\x1b[0;32m", DIM = "\x1b[2m", RST = "\x1b[0m";
-  const color = { BROKEN: RED, DUPLICATE: RED, ORPHAN: YEL };
-  const order = { BROKEN: 0, DUPLICATE: 1, ORPHAN: 2 };
+  const color = { BROKEN: RED, DUPLICATE: RED, ORPHAN: YEL, UNTYPED: YEL };
+  const order = { BROKEN: 0, DUPLICATE: 1, ORPHAN: 2, UNTYPED: 3 };
   for (const f of findings.sort((a, b) => order[a.level] - order[b.level] || a.file.localeCompare(b.file))) {
     console.log(`${f.file}:${f.line}: ${color[f.level]}${f.level}${RST}: ${f.msg}`);
   }
@@ -196,7 +216,7 @@ function run(wikiRoot, { asJson, strict }) {
     const parts = Object.entries(by).map(([k, v]) => `${v} ${k.toLowerCase()}`).join(", ");
     const mark = fail ? `${RED}✗${RST}` : `${YEL}⚠${RST}`;
     console.log(`\n${mark} ${findings.length} finding(s): ${parts} ${DIM}(${pages.length} page(s) scanned` +
-      `${!hard.length && !strict ? "; orphans are advisory — exit 0" : ""})${RST}`);
+      `${!hard.length && !strict ? "; orphan/untyped are advisory — exit 0" : ""})${RST}`);
   }
   process.exit(fail ? 1 : 0);
 }
@@ -233,6 +253,11 @@ function selftest() {
   eq(normKey("  Bounded-Context "), "bounded-context", "normKey trim+lower");
   eq(normKey("Domain  Driven   Design"), "domain driven design", "normKey collapse ws");
   eq(normKey("Bounded Context") === normKey("Bounded-Context"), false, "normKey dash != space");
+
+  // hasTypedSection: recognizes the relationship headings (any level), else false.
+  eq(hasTypedSection("body [[X]]\n## See also\n- [[Y]]"), true, "hasTypedSection (See also)");
+  eq(hasTypedSection("### Contrasted with\n- [[Y]]"), true, "hasTypedSection (Contrasted with, h3)");
+  eq(hasTypedSection("## Notes\nlinks [[A]] [[B]] in prose only"), false, "hasTypedSection (none → false)");
 
   console.log(fail ? `\nFAIL (${fail})` : "\nlint-links.mjs OK");
   return fail;
