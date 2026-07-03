@@ -12,20 +12,24 @@ significant improvement lives.
 
 ## Head-to-head on connection-building
 
-| Axis | llm-wiki-compiler | claude-obsidian | mnemex today |
-|---|---|---|---|
-| **Edge creation** | ✅ deterministic: `resolver.ts` links **every** title-mention exhaustively | 🟡 prose fan-out **quota** (8–15), no engine to find targets | ❌ single-pass **agent memory** only |
-| **Retroactive self-heal** | ✅ `resolveInboundLinks` rescans ALL pages when a new concept appears | ❌ | ❌ ("disconnected islands" — worked around by batch-by-theme) |
-| **Backlinks / bidirectional** | ✅ `buildAdjacency` incoming edges, free | 🟡 soft "check B links back", rots | 🟡 `## Referenced by` hand-maintained, silently rots |
-| **Edge TYPING** | ❌ collapses to `reason:"wikilink"`; rich LLM relations (contradicted_by, confidence) never reach the graph | 🟡 typed-by-section, but generic templates collapse to one `## Connections` | ✅ typed + weighted + surfaced, **and consumed** by `graph-expand` |
-| **Semantic edges** | ❌ title-mention only — two related pages that never name each other are NEVER linked | 🟡 whatever the agent read | ❌ none at ingest |
-| **Measurement** | 🟡 floors (`minWikilinks`) — a floor is not recall | ❌ nothing | ✅ measures whether the graph *helps retrieval* (4-arm ablation) |
+> Updated after this session — the mnemex column reflects what was BUILT (suggest-links, UNTYPED lint), with honest measured status. ⬆ = improved this session.
 
-**Honest verdict:** no system dominates. llmwiki wins on **mechanical completeness + retroactive
-self-heal** (the one thing prose-by-memory fundamentally can't do). cobsidian wins on **typed +
-contradiction discipline breadth**. mnemex wins on **typed-edge quality + provenance + measurement**
-— but has **zero connection DISCOVERY**: every edge is born from single-pass agent memory + a lossy
-~500-word `hot.md`.
+| Axis | llm-wiki-compiler | claude-obsidian | mnemex (after this session) |
+|---|---|---|---|
+| **Edge creation** | ✅ deterministic: `resolver.ts` links **every** title-mention exhaustively | 🟡 prose fan-out **quota** (8–15), no engine to find targets | ◑ **`suggest-links`** ⬆ — qmd surfaces missed candidates, agent types them (was ❌ memory-only) |
+| **Retroactive self-heal** | ✅ `resolveInboundLinks` rescans ALL pages when a new concept appears | ❌ | 🟡 can run `suggest-links` on any page on demand; not auto-on-new-concept (still no true self-heal) |
+| **Backlinks / bidirectional** | ✅ `buildAdjacency` incoming edges, free | 🟡 soft "check B links back", rots | 🟡 `## Referenced by` hand-maintained (unchanged) |
+| **Edge TYPING** | ❌ collapses to `reason:"wikilink"` | 🟡 typed-by-section, generic templates collapse to `## Connections` | ✅ typed + weighted + consumed by `graph-expand`; **UNTYPED lint** ⬆ now nudges the convention |
+| **Semantic edges** | ❌ title-mention only — two related pages that never name each other are NEVER linked | 🟡 whatever the agent read | ✅ **`suggest-links`** ⬆ — semantic (qmd), the exact edge llmwiki structurally cannot make |
+| **Measurement** | 🟡 floors (`minWikilinks`) — a floor is not recall | ❌ nothing | ✅ measures retrieval **and the linking itself** ⬆ (suggester 73% precision, +6% graph density) |
+
+**Honest verdict (updated).** llmwiki still wins on **mechanical completeness + retroactive
+self-heal** (auto-rescan of old pages on a new concept — mnemex has no true equivalent). cobsidian wins
+on typed + contradiction discipline breadth. mnemex wins on **typed-edge quality + provenance +
+measurement**, and — after this session — **closed its one big gap: semantic connection DISCOVERY**
+via `suggest-links` (qmd), measured at 73% precision / +6% graph density. So no system dominates: the
+remaining mnemex weakness is retroactive self-heal; its edge is semantic discovery + typing + the fact
+that it is the only one that *measures* its own linking.
 
 **The opening:** llmwiki's programmatic graph is *strictly weaker* than an LLM/engine on one axis —
 it can only make an edge when one page literally spells another's title. A qmd-powered semantic
