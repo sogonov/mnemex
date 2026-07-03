@@ -70,6 +70,32 @@ The 27% false positives are honest and obvious on reading: title coincidences (`
 `Stability-Patterns`, "different subdomain"), metaphorical ties (`DORA` → `Validated-Learning`). All
 the kind a human rejects in one glance — which is exactly the propose-agent-gates contract.
 
+### Did the CORE actually get better? Before/after graph density (the real question)
+
+Precision measures the tool; this measures the **wiki**. The 33 judge-verified true candidates are
+links the agent authored the page WITHOUT — genuine misses the suggester recovers. Against the pages'
+**existing** authored links (counted from the wiki), that is the real completeness gain:
+
+| | resolvable page-links |
+|---|---|
+| **before** (40 sampled pages, existing) | 553 (avg 13.8/page) |
+| recovered genuine misses (judge-verified) | +33 |
+| **after** | 586 |
+
+- **+6% denser corpus-wide** (553 → 586); **+11% on the 21 pages the tool touched** (304 → 337).
+- **+1.6 genuine links per touched page.**
+
+**Honest read — real but MODEST, and it corrects the study's own premise.** The synthesis claimed the
+agent "links ~5 of the 20 it should." That was wrong: the pages already average **13.8 links** — the
+agent links *densely* by memory. The suggester recovers **~1.6 more genuine links per touched page**
+(on ~half the pages), for **+6% corpus density** at **73% precision** and **~15s/page**. It is a real,
+judge-verified improvement to graph completeness — not the transformation the "5 of 20" framing
+implied. Caveats: the gain is a **lower bound** on the true gap (the tool only recovers what it
+surfaces above the floor — genuinely-missed links that aren't semantically close are not counted); and
+"before" links are assumed correct (the agent authored them deliberately). Decision: **kept on** as
+ingest step 6 — a measured +6% completeness for a few minutes/ingest — but framed honestly as a modest
+discovery aid, not a core-transforming lever.
+
 **Honest confidence:** the suggester is now *measured*, not hoped — 73% precision, sparse, ~15s/page.
 It genuinely surfaces missed connections; it is not perfect and not fast. Earlier "~2s/page" was a
 wrong extrapolation from a single warm query; the real batch cost is ~15s/page.
