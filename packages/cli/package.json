@@ -1,6 +1,6 @@
 {
   "name": "@mnemex/cli",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "CLI for mnemex: scaffold a wiki, check deps, and wire up the MCP servers.",
   "type": "module",
   "license": "MIT",

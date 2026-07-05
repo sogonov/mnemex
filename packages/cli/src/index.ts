@@ -14,7 +14,7 @@ const program = new Command();
 program
   .name("mnemex")
   .description("Scaffold and manage an LLM-curated personal knowledge wiki.")
-  .version("0.1.2");
+  .version("0.2.0");
 
 program
   .command("init")
