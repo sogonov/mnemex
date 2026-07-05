@@ -11,8 +11,8 @@ export QMD_EMBED_MODEL="${QMD_EMBED_MODEL:-hf:Qwen/Qwen3-Embedding-0.6B-GGUF/Qwe
 echo "==> Updating qmd index"
 qmd update
 
-echo "==> Updating embeddings"
-qmd embed
+echo "==> Updating embeddings (resilient — loops until complete)"
+"$(cd "$(dirname "$0")" && pwd)/qmd-embed.sh"
 
 echo "==> Done."
 qmd status
