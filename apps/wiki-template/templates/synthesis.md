@@ -30,9 +30,12 @@ According to [[Source-A]], <claim>. This contrasts with [[Source-B]], which argu
 
 ## Evidence
 
+The `Location` cell is a provenance token resolving to the raw source lines
+(`^[<raw-path>:Lstart-Lend]`) — lint checks it.
+
 | Claim | Source | Location | Strength |
 |---|---|---|---|
-| ... | [[Source-A]] | Ch. 3 | strong / weak / contested |
+| ... | [[Source-A]] | ^[raw/books/<slug>/book.md:412-418] | strong / weak / contested |
 
 ## Concepts involved
 

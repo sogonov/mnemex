@@ -4,6 +4,10 @@ import { init } from "./init.js";
 import { doctor } from "./doctor.js";
 import { mcpInstall, mcpStatus } from "./mcp.js";
 import { setupSearch, reindex, search } from "./search.js";
+import { lint } from "./lint.js";
+import { verify } from "./verify.js";
+import { cleanRaw } from "./clean.js";
+import { suggestLinks } from "./suggest.js";
 
 const program = new Command();
 
@@ -54,5 +58,42 @@ program
   .argument("<query>", "What to search for")
   .description("Search your wiki from the terminal (wraps qmd query)")
   .action((query) => search(query));
+
+program
+  .command("lint")
+  .description("Check wiki health: claim-level provenance + wikilink integrity")
+  .option("--wiki <path>", "Wiki root path")
+  .option("--json", "Emit findings as JSON")
+  .option("--strict", "Fail on orphan pages too (advisory by default)")
+  .action((opts) => lint(opts));
+
+program
+  .command("verify")
+  .description("Claim-verification worksheet: pair each claim with its exact cited raw lines")
+  .option("--wiki <path>", "Wiki root path")
+  .option("--json", "Emit worksheet as JSON")
+  .option("--page <rel>", "Limit to one page (e.g. sources/DDD-Evans.md)")
+  .action((opts) => verify(opts));
+
+program
+  .command("clean-raw")
+  .description("Retrofit the conversion pipeline (strip boilerplate, recover structure, breadcrumbs, metadata) onto already-ingested books")
+  .option("--wiki <path>", "Wiki root path")
+  .option("--dry-run", "Report what would change without writing")
+  .option("--keep-boilerplate", "Don't strip Project Gutenberg license text")
+  .option("--no-structure", "Don't promote division markers to headings")
+  .option("--breadcrumb", "Also inject contextual breadcrumbs (off by default — no measured retrieval benefit)")
+  .option("--no-meta", "Don't auto-fill meta.yaml from the Gutenberg header")
+  .action((opts) => cleanRaw(opts));
+
+program
+  .command("suggest-links [pages...]")
+  .description("Suggest link candidates (via qmd) each page is related to but doesn't yet link")
+  .option("--wiki <path>", "Wiki root path")
+  .option("--collection <name>", "qmd collection to search (default mnemex-wiki)")
+  .option("--n <k>", "Max candidates per page (default 8)")
+  .option("--min-score <s>", "Score floor to cut noise (default 0.4)")
+  .option("--json", "Emit as JSON")
+  .action((pages, opts) => suggestLinks(opts, pages));
 
 program.parseAsync(process.argv);

@@ -40,6 +40,7 @@ Markdown files you write and maintain. The owner reads; you write. Subfolders by
 - `templates/` — page templates you use when creating new pages.
 - `index.md` — content catalog. Updated on every ingest.
 - `log.md` — chronological journal. Appended after every operation.
+- `hot.md` — a ~500-word rolling orientation cache: what was read recently, which threads are open, what to read next. Refreshed on every ingest and read first on every query. Cheap cross-session memory so you don't re-derive context each session.
 
 ---
 
@@ -76,6 +77,41 @@ aliases: ["DDD", "Domain Driven Design"]
 
 ---
 
+## Provenance — claim-level citations
+
+Every extracted claim must be traceable to the exact place in the raw source it came from. This
+is what separates a synthesis you can trust from one you have to re-check by hand. The rule:
+
+> **Every extracted claim, evidence-table row, and source-attributed definition carries a
+> provenance token that resolves to the raw source lines.**
+
+**Token format:** `^[<raw-path>:Lstart-Lend]`
+
+- `<raw-path>` is the path to the immutable raw file, relative to the wiki root — e.g.
+  `raw/books/evans-ddd-2003/book.md`. Use the raw file, **not** the wiki page: raw line numbers
+  are stable because you never edit `raw/`.
+- `Lstart-Lend` is an inclusive line range in that file, `Lstart <= Lend`.
+- Full example: `^[raw/books/evans-ddd-2003/book.md:412-418]`.
+- **Chapter fallback** (only when the raw file has no usable line map, e.g. a scanned book):
+  `^[<slug>#Ch.3]` — e.g. `^[evans-ddd-2003#Ch.3]`. Prefer line ranges; the eval rewards them.
+
+**Where it's mandatory:**
+- `wiki/sources/*` — every bullet under **Extracted claims**, and every "Key claim" in the
+  chapter summaries.
+- `wiki/syntheses/*` — the `Location` column of the **Evidence** table.
+- `wiki/concepts/*` — the source-attributed line in **Definition** (and each variant if sources
+  differ).
+
+**How to find the lines:** when reading the raw file, note the line numbers of the passage you're
+citing (`Read` shows them; `qmd get <file>:<line>` slices around a line). Cite the tightest range
+that contains the claim — a paragraph, not a chapter.
+
+`scripts/lint-citations.mjs` enforces this: it flags claims with no token, malformed tokens, and
+tokens whose raw file is missing or whose line range is out of bounds. Run it before finishing an
+ingest (see **Lint** below).
+
+---
+
 ## Operations
 
 ### Ingest (when the owner adds a source)
@@ -84,12 +120,29 @@ When a new file appears in `raw/` (or the owner asks you to ingest something):
 
 1. **Read the source.** For books, read the whole thing — don't skim. For long books, you may need multiple passes.
 2. **Discuss key takeaways** with the owner in 3–5 bullet points before writing anything. Wait for direction on what to emphasize.
-3. **Create a source page** in `wiki/sources/` using `templates/source.md`. Fill in: bibliographic meta, TOC, chapter-by-chapter summary, list of extracted claims with locations (chapter/page), list of key entities and concepts mentioned (as wikilinks).
+3. **Create a source page** in `wiki/sources/` using `templates/source.md`. Fill in: bibliographic meta (**read `raw/books/<slug>/meta.yaml` — it's auto-filled from the source header; copy it, only research what's blank**), TOC, chapter-by-chapter summary, list of extracted claims **each with a `^[raw-path:Lstart-Lend]` provenance token** (see **Provenance** above — this is mandatory, lint enforces it), list of key entities and concepts mentioned (as wikilinks).
 4. **Update or create entity pages** for people, books, companies, tools mentioned. Use `templates/entity.md`.
 5. **Update or create concept pages** for ideas, patterns, frameworks. Use `templates/concept.md`. **Before creating a new concept page, search `index.md` and all `aliases:` fields for synonyms.** If a similar concept exists, extend the existing page or add an alias rather than creating a duplicate.
-6. **Update `index.md`** — add new pages to their category section.
-7. **Append a log entry** to `log.md` with format `## [YYYY-MM-DD HH:MM] ingest | <source title>` followed by a one-line summary and list of pages touched.
-8. **Flag contradictions.** If a new source contradicts an existing claim, add a `> [!warning] Contradiction` callout on the relevant page with citations to both sources. Don't silently overwrite.
+6. **Discover the connections you missed.** You just linked what you *recalled* — but a new source
+   belongs in the graph next to pages you didn't reread. Run `node scripts/suggest-links.mjs`
+   (or `mnemex suggest-links`) on the new/changed pages: it asks the qmd index which existing pages
+   each one is most related to **but doesn't yet link**, and prints a scored candidate worklist.
+   **Triage it** — for each genuine connection, read both pages and file it under the right typed
+   section (`## Builds on` / `## Subsumes` / `## Contrasted with` / `## Contradicts` / `## See also`);
+   drop the off-topic ones. This is connection *discovery* — the one thing single-pass memory can't do
+   (see **Discovering connections** below). The script only suggests; **you** decide the type.
+7. **Update `index.md`** — add new pages to their category section.
+8. **Append a log entry** to `log.md` with format `## [YYYY-MM-DD HH:MM] ingest | <source title>` followed by a one-line summary and list of pages touched.
+9. **Verify your own claims against the source.** Before you build anything on top of the new
+   claims, check that they say what the source says. Run `node scripts/verify-claims.mjs`
+   (or `mnemex verify`) — it slices the exact cited raw lines next to each claim. **Do the judgment
+   with fresh context** (spawn a sub-agent, or re-read cold): for each row, does the cited passage
+   *support* the claim, or did you paraphrase something the source never states? Flag every
+   unsupported/overreaching claim with a `> [!caution] Unverified — cited lines don't support this`
+   callout and fix or cut it. This is the semantic gate above lint (see **Verify** below); it's how
+   the wiki stays trustworthy without a human re-reading every ingest.
+10. **Flag contradictions.** If a new source conflicts with an existing claim, add a `> [!warning] Contradiction` / `> [!warning] Tension` / `> [!note] Composition` callout (whichever fits) on the relevant page, naming both sides with citations and a boundary-conditioned `Resolution:` line. Never silently overwrite. See **Contradictions & tensions** below.
+11. **Refresh `hot.md`.** Update the ~500-word rolling orientation file: what was just ingested, which threads it opened or closed, what to read next. This is cheap cross-session memory (see **Schema layer**).
 
 A single ingest typically touches **10–15 wiki pages**. That's correct — it's the bookkeeping you exist to do.
 
@@ -102,23 +155,77 @@ A single ingest typically touches **10–15 wiki pages**. That's correct — it'
 
 ### Query (when the owner asks a question)
 
-1. **Read `index.md` first** to locate relevant pages.
-2. If the search MCP is connected (`mnemex-search`, powered by qmd — `brain.query`), use it for full-text + semantic search across `wiki/` and `raw/`. Otherwise use `Grep`/`Read` directly.
-3. **Read relevant wiki pages, not raw sources.** The wiki is the synthesis; only drop to `raw/` for direct quotation or fact-checking.
-4. **Synthesize with citations.** Every claim should link `[[Source-Page]]` so the owner can trace it.
-5. **Offer to file the answer.** If the synthesis is non-trivial — a comparison, a thesis, a "how do these books agree" — propose creating a new page in `wiki/syntheses/`. Don't let valuable analysis disappear into chat history.
+1. **Read `hot.md` then `index.md` first** — `hot.md` gives you cross-session orientation (what was read recently, open threads); `index.md` locates the relevant pages.
+2. **Route by intent — it changes the strategy.** Don't run the same heavy search for every question:
+   - *simple lookup / definition* → one search, take the top concept/synthesis page. Don't over-expand.
+   - *concept / "how does X work"* → synthesis-first (step 3), then walk the graph (step 4).
+   - *cross-source / comparison* → decompose: follow the concept's `Contrasted-with` links and issue **one sub-query per source**, then union the results — this deterministically pulls in the *other side* of the comparison.
+   - *verbatim quote / fact-check* → retrieve the wiki page, then descend to `raw/` via its provenance token.
+3. **Search synthesis-first.** With the search MCP (`mnemex-search`, powered by qmd — `brain.query`), issue typed sub-queries (keyword + semantic). Prefer `wiki/syntheses/` and `wiki/concepts/` pages — they are the **pre-compiled context** (a synthesis page already situates its claims, so it retrieves better than a raw chunk). The index is multilingual, so a Russian question can land on a Russian synthesis page that cites an English source. Without the MCP, use `Grep`/`Read`.
+4. **Walk the typed graph, then descend to raw.** From the best page, follow its **typed links** (`Builds-on` / `Subsumes` / `Contrasted-with` / `Contradicts` / `See also`) to pull in neighbors that flat search misses — and **always surface `Contradicts` / `Contrasted-with`** so you present the tension, not one side. For a direct quote or fact-check, follow the page's `^[raw:Lstart-Lend]` token down to the exact lines in `raw/`. Pull only the neighbors the question needs — don't dump the whole neighborhood into the answer.
+5. **Answer only from the wiki, cite every claim, and abstain when the wiki is thin.** This is the contract that makes the answer trustworthy:
+   - Ground every non-trivial claim in a `[[Source-Page]]` link (add the `^[raw:Lstart-Lend]` provenance token when quoting or fact-checking).
+   - **Attribute, don't generalize** — "Evans argues…", "Kahneman shows…", never "it's known that…" or "best practice says…".
+   - **If the wiki doesn't cover it, say so explicitly** ("the wiki has nothing on this — answering from general knowledge") rather than bluffing. Absence is a useful signal about what to read next.
+   - **Surface disagreement, don't resolve it silently** — if two sources conflict, name both and explain the tension (see **Contradictions & tensions**). Don't pick a side without saying you did.
+   - **Answer in the language the owner asked in.** Match the question's language (the retrieval layer is multilingual by default).
+6. **Offer to file the answer.** If the synthesis is non-trivial — a comparison, a thesis, a "how do these books agree" — propose creating a new page in `wiki/syntheses/`. Don't let valuable analysis disappear into chat history.
 
 ### Lint (periodic health check)
 
 When the owner asks for lint, or proactively after every ~20 ingests:
 
+**Code lint (deterministic — run the scripts, or `mnemex lint` which runs both):**
+
+- `scripts/lint-citations.mjs` — claim-level provenance across `wiki/sources/` and `wiki/syntheses/`:
+  claims with **no** token, **malformed** tokens, and tokens whose raw file is missing or line range
+  is out of bounds.
+- `scripts/lint-links.mjs` — wikilink integrity across all of `wiki/`: **broken** `[[links]]`
+  (resolve to no page, by basename or alias), **duplicate** names (one basename/alias owned by 2+
+  pages — an ambiguous `[[link]]` target, the "same concept under two names" trap), **orphan**
+  pages (no inbound link from another page), and **untyped** pages (3+ wikilinks but no typed
+  relationship section — relationships all buried in prose, the "everything is related" trap; a
+  cosmetic/consistency nudge toward `## See also` / `Builds on` / `Subsumes` / `Contrasted with` /
+  `Contradicts`). Fence-aware, alias-aware, Unicode-safe (Cyrillic titles resolve). Orphan + untyped
+  are advisory (exit 0); `--strict` fails on them too.
+
+`mnemex lint` exits non-zero on any hard finding (broken/duplicate; orphans only under `--strict`).
+Run it at the end of every ingest and fix what it reports.
+
+**Judgment lint (you do this by reading — the fuzzy calls a script can't make):**
+
 - Find **contradictions** between pages that aren't already flagged.
 - Find **stale claims** (a `source: 1` page where the only source has been superseded by newer reading).
-- Find **orphan pages** — no inbound wikilinks. Either delete or integrate.
+- Find **near-duplicate concepts** — pages with *similar* (not byte-identical) titles or overlapping
+  meaning that `lint-links` can't catch. Propose merges. (Exact basename/alias collisions are already
+  caught by `lint-links`; this is the semantic layer above it.)
 - Find **implicit concepts** — terms used on 3+ pages with no concept page of their own.
-- Find **broken wikilinks**.
-- Find **duplicate concepts** — pages with similar titles or overlapping aliases. Propose merges.
+- For each **orphan** `lint-links` flags, decide per page: delete, integrate, or accept (a fresh stub
+  legitimately has no inbound links yet).
 - Report findings as a list. Don't fix without owner approval.
+
+### Verify (does the source actually support the claim?)
+
+Lint proves a provenance token *resolves* — the raw file exists, the line range is in bounds. It
+cannot prove the cited lines *support* the claim; that's a semantic judgment. `verify-claims.mjs`
+closes the gap **without a human re-reading every ingest** and **without you re-reading the whole
+book** (which is how paraphrase-drift and fabrication creep back in):
+
+`node scripts/verify-claims.mjs` (or `mnemex verify`) walks every claim in `wiki/sources/` and
+`wiki/syntheses/` that carries a `^[raw:Lstart-Lend]` token, slices the **exact** cited lines out of
+the immutable raw source, and prints a worksheet pairing each claim with what the source literally
+says there. It does **not** judge — it hands you un-fakeable text to judge against.
+
+**The judgment must be fresh-context.** Don't verify with the same context that wrote the claims —
+you'll rubber-stamp your own paraphrase. Spawn a sub-agent (or re-read cold) and, for each worksheet
+row, decide: do the cited lines support the claim as stated? Flag every miss with a
+`> [!caution] Unverified — cited lines don't support this` callout on the page, then fix or cut it.
+Run it as **step 8 of every ingest** (see **Ingest** above) and whenever the owner asks to verify a
+page (`mnemex verify --page sources/<Name>.md`). Rows that print `⚠ raw missing / out-of-range` are a
+lint failure first — run `mnemex lint` and fix the token before verifying.
+
+This is the "fresh-context verifier" (proven by claude-obsidian) in mnemex's idiom: a deterministic
+script does the mechanical slicing, the judgment stays in prose where the intelligence lives.
 
 ---
 
@@ -152,6 +259,68 @@ When linking concepts, prefer typed sections over bare wikilinks. Conventions:
 
 This is the fix for the "Similar, contains, contradicts — all collapsed into one word" problem from the gist comments.
 
+### Discovering connections (don't rely on memory)
+
+Typed sections fix *how* you link. This fixes *what you forget to link*. The value of a compounding
+library is that a new source lands next to everything it relates to — but on a single reading pass you
+only link the pages you happened to recall. The pages you didn't reread stay disconnected ("islands"),
+and the graph is only as good as your memory.
+
+`scripts/suggest-links.mjs` (or `mnemex suggest-links`) closes that gap with the search index you
+already have: for a page, it runs a compact query (title + lead) against the wiki collection via qmd,
+and lists the existing pages it's most related to **but doesn't yet link** — scored, already-linked
+targets excluded. Run it as **ingest step 6** on every new/changed page, and any time you sense a page
+is under-connected.
+
+**It suggests; you decide.** A high score means *similar*, which is not the same as *should-link* —
+so triage: read both pages, and only file a candidate under a typed section if there's a real
+`Builds-on` / `Subsumes` / `Contrasted-with` / `Contradicts` / `See-also` relationship. Drop the rest.
+This is the one linking move pure prose can't do — it surfaces the connection from the *whole corpus*,
+not just what you reread.
+
+Measured on a 615-page wiki (`docs/methodology/linking-core-study.md`): **~73% of suggestions are
+genuine should-links** (you reject the rest — title coincidences, same-topic-not-related), it's
+**sparse** (~half of pages get nothing — that's fine, their neighbors are already linked), and it
+costs **~15s/page** (an ingest spends a few minutes here). Honest scope: connection **discovery** for
+a richer, navigable graph — not a proven retrieval-recall lever.
+
+---
+
+## Contradictions & tensions (never overwrite a conflicting claim — hold the conflict)
+
+When a new source disagrees with something already in the wiki, the worst thing you can do is
+silently overwrite. The value of a compounding library is that it *remembers the disagreement*
+and, where possible, resolves it with boundary conditions. Three distinct callout types — do not
+collapse them:
+
+- **`> [!warning] Contradiction — A vs. B`** — a genuine conflict: the two sources make claims that
+  cannot both be true as stated.
+- **`> [!warning] Tension — A vs. B`** — same word or metaphor, *different referent or scale*; not a
+  real contradiction, but worth flagging so the reader doesn't conflate them.
+- **`> [!note] Composition with [[X]]`** — the new source *layers* with an existing page
+  (complementary, not conflicting) — one supplies substance, the other delivery, etc.
+
+Every one of these names **both sides with attribution**, states each claim, and — this is the part
+that makes the library worth more than the sum of its books — ends with a **`Resolution:`** clause
+giving the **boundary condition**: *when A holds vs. when B holds*. A resolution without boundaries
+("they're both kind of right") is a non-answer.
+
+```markdown
+## Contradictions / tensions
+
+> [!warning] Contradiction — [[Voss-2016]] vs. [[Fisher-Ury-2011]]
+> Fisher-Ury: "separate the people from the problem" — deal with emotion separately.
+> Voss: emotion is the *substrate* of the deal; it can't be separated.
+> **Resolution:** Voss holds when the counterpart is emotional or asymmetrically informed
+> (most real negotiations); Fisher-Ury holds when both sides are rational and the merits are
+> knowable (treaty drafting, sophisticated M&A). They layer: Fisher-Ury on substance, Voss on
+> delivery. See [[Principled-vs-Tactical-Negotiation]].
+```
+
+Where the callout lives: on the most-affected page (concept or source), and — if the resolution
+is non-trivial — promoted into a `wiki/syntheses/` page that both sources link to. During a query,
+when two sources conflict, reproduce the tension for the owner; never pick a side without saying so.
+
 ---
 
 ## Levels (avoid flat hierarchy)
@@ -183,3 +352,14 @@ If the search MCP server is connected (`mnemex-search`, powered by qmd), you hav
 If filesystem access is available (Cowork / Claude Code with direct file access), you can `Read`/`Grep`/`Glob` directly.
 
 To download and ingest books into `raw/books/`, the `@mnemex/library-mcp` server provides search + download tools for Project Gutenberg and Anna's Archive. The conversion script lives at `scripts/ingest-book.sh` (run `scripts/setup-converters.sh` once to install pandoc/calibre/etc).
+
+**The conversion pipeline runs automatically** in `ingest-book.sh` (opt-outs in parens), so `raw/books/<slug>/book.md` arrives clean:
+1. **`extract-meta.mjs`** — auto-fills `meta.yaml` (title / author / year / language / eBook-id / translator / editor) from the Gutenberg header, so **you rarely fill bibliographic meta by hand** — read `meta.yaml` first and only fill what's blank.
+2. **`strip-boilerplate.mjs`** — removes the Project Gutenberg license header + footer (`--keep-boilerplate`).
+3. **`structure.mjs`** — promotes flat `BOOK/PART/CHAPTER …` division markers to real ATX headings so the book is navigable (Obsidian outline) and qmd can chunk along chapters (`--no-structure`).
+
+The passes run conversion-time (before any `^[raw:L-L]` token exists → line numbers stay stable), are idempotent, multilingual-safe, and no-op on non-Gutenberg / heading-less sources.
+
+**Off by default: `breadcrumb.mjs`** (opt in with `--breadcrumb`). It injects ancestor-path breadcrumbs under headings — Anthropic-style Contextual Retrieval. A controlled 3-arm test (n=48, `eval/probe3-*`, see `eval/BASELINE.md`) found **no significant retrieval benefit** (Δ+2.1 pts, p=1.0): a per-section breadcrumb never reaches the deep chunks qmd splits off, and qmd already carries docTitle + nearest heading. So it only adds noise lines to raw for no measured gain — kept opt-in, not run by default.
+
+**Retrofit old books:** for anything ingested before these passes existed, run `mnemex clean-raw` (or `node scripts/clean-raw.mjs --wiki .`) — it applies the same pipeline to every `raw/books/*/book.md`. Use `--dry-run` first to preview; it's idempotent, so a second run is a no-op.

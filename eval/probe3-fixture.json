@@ -1,0 +1,272 @@
+[
+  {
+    "slug": "kleppmann-ddia-2017",
+    "queries": [
+      {
+        "query": "When the book warns against relying on a programming language's built-in serialization for anything beyond very transient data, what security danger does it describe if an attacker can feed your program a byte sequence to deserialize?",
+        "gold_phrase": "instantiate arbitrary classes, which in turn often allows them",
+        "leak": 0
+      },
+      {
+        "query": "In the critique of textual encodings' loose handling of numeric precision, what workaround does a large microblogging platform apply in its API so that clients using floating-point arithmetic don't corrupt very large identifiers?",
+        "gold_phrase": "includes tweet IDs twice, once as a JSON number and once as a decimal string",
+        "leak": 0
+      },
+      {
+        "query": "In the argument against a naive modulo-based scheme for mapping keys to servers, what worked numeric example shows one key hopping to a different server each time the cluster is expanded?",
+        "gold_phrase": "that key starts out on node 6 (because 123456",
+        "leak": 0
+      },
+      {
+        "query": "In the rebalancing strategy that provisions many more shards than machines from the outset, how does a newly joined machine acquire its portion of the workload from the others?",
+        "gold_phrase": "a few partitions from every existing node until partitions are",
+        "leak": 0
+      },
+      {
+        "query": "In the case for treating datacenter networks as less dependable than assumed, what did a study of a mid-sized facility measure about how frequently and how widely connectivity was lost?",
+        "gold_phrase": "12 network faults per month, of which half disconnected a single machine",
+        "leak": 0
+      },
+      {
+        "query": "In the comparison of circuit-switched telephone networks with packet-switched ones, what fixed per-frame allocation does a call receive that guarantees a bounded end-to-end latency?",
+        "gold_phrase": "send exactly 16 bits of audio data every 250 microseconds",
+        "leak": 0
+      },
+      {
+        "query": "In the case for immutable append-only event logs, how does the analogy to double-entry bookkeeping show that fixing an error need not erase the original erroneous record?",
+        "gold_phrase": "they add another transaction that compensates for the mistake",
+        "leak": 0
+      },
+      {
+        "query": "When explaining why a stream processor must separate the moment an event actually occurred from the moment it is handled, what pop-culture film franchise does the author invoke as an illustration?",
+        "gold_phrase": "the order in which you processed the movies is inconsistent",
+        "leak": 0
+      }
+    ]
+  },
+  {
+    "slug": "kimball-data-warehouse-toolkit-3rd",
+    "queries": [
+      {
+        "query": "A dimension stores, for each node, an encoded text description of its full path down from the top of an organization tree. What lasting drawback does the author warn about if that tree ever gets reorganized?",
+        "gold_phrase": "vulnerable to structure changes in the ragged hierarchy that could force",
+        "leak": 0
+      },
+      {
+        "query": "A designer built a distinct day, month, quarter, and year dimension and wired all four foreign keys into the same fact table. What single corrective action does the author prescribe for these many-to-one related tables?",
+        "gold_phrase": "collapsed back to their unique lowest grains, such as the date",
+        "leak": 0
+      },
+      {
+        "query": "An accumulating snapshot captures many process milestones, and users want every possible elapsed interval between pairs of them. Rather than force each query to compute all those intervals, what economical thing does the author suggest storing per milestone?",
+        "gold_phrase": "one time lag can be stored for each step measured against the process",
+        "leak": 0.29
+      },
+      {
+        "query": "A product's standard list price could be either a measure or a descriptor. According to the author, under what usage pattern should such a borderline number live as a descriptive attribute instead of in the fact row?",
+        "gold_phrase": "a stable numeric value is used predominantly for filtering and grouping",
+        "leak": 0
+      },
+      {
+        "query": "A team merges facts from two separate business processes into one table sharing a common grain. Before cautioning about the dimensional compromise, what two upsides does the author acknowledge such a combined table can deliver?",
+        "gold_phrase": "consolidated fact tables can be useful, both in terms of performance and usability",
+        "leak": 0
+      },
+      {
+        "query": "When a source system crams everything into one catch-all field for a person's name, what sorts of stray legal or descriptive labels does the author say you might find lurking there instead of an actual name?",
+        "gold_phrase": "Confidential, Trustee, or UGMA (Uniform Gift to Minors Act)",
+        "leak": 0
+      },
+      {
+        "query": "In arguing why plain English-oriented encoding cannot represent Cyrillic, Arabic, or Chinese writing, the author cites the sheer scale of the modern replacement standard. What count does he give?",
+        "gold_phrase": "defined specific interpretations for 110,182 possible characters",
+        "leak": 0
+      },
+      {
+        "query": "Several customer master files get merged and their overlapping records disagree on some fields. What term does the author use for the step that assembles a single best-of row, and how does he define it?",
+        "gold_phrase": "matched records into a unified image that combines the highest quality columns",
+        "leak": 0.13
+      }
+    ]
+  },
+  {
+    "slug": "fowler-refactoring-2nd",
+    "queries": [
+      {
+        "query": "In the invoice-printing walkthrough from the extract-function chapter, why does the author refuse to read the machine's current time directly inside his business logic?",
+        "gold_phrase": "it leads to nondeterministic tests and makes it difficult to reproduce",
+        "leak": 0
+      },
+      {
+        "query": "In the passage arguing that a program's real strength comes from how well its information is organized, what does the author say badly-shaped models force you to write a lot of?",
+        "gold_phrase": "poor data structures lead to lots of code whose job is merely dealing",
+        "leak": 0
+      },
+      {
+        "query": "In the discussion of combining conditional checks, how does the author describe the clarity gained when a condition is lifted into a well-named helper?",
+        "gold_phrase": "It replaces a statement of what I'm doing with why I'm doing it",
+        "leak": 0
+      },
+      {
+        "query": "Where the author explains making hidden assumptions explicit, what property does he insist must still hold even if you stripped out every such check from the code?",
+        "gold_phrase": "the program functions equally correctly if they are all removed",
+        "leak": 0
+      },
+      {
+        "query": "When the author defends the rule that a function returning a result shouldn't change state, how does he reconcile it with speeding up later lookups by remembering computed answers?",
+        "gold_phrase": "cache the value of a query in a field so that repeated calls go quicker",
+        "leak": 0
+      },
+      {
+        "query": "In the pull-up-method walkthrough, what does the author call the exception thrown by a placeholder method meant to force descendant classes to supply their own version, borrowing a term from an older object language?",
+        "gold_phrase": "a subclass responsibility error as that was the name used in Smalltalk",
+        "leak": 0
+      },
+      {
+        "query": "In the motivation for swapping inheritance for a held object, what classic misuse does the author cite where a LIFO type exposed collection methods that made no sense on it?",
+        "gold_phrase": "All the operations of the list were present on the interface of the stack",
+        "leak": 0
+      },
+      {
+        "query": "What term does the author coin for the subtle design blunder of treating a product's blueprint and one concrete physical unit as the same class?",
+        "gold_phrase": "modeling mistake which I've called the type-instance homonym",
+        "leak": 0
+      }
+    ]
+  },
+  {
+    "slug": "ousterhout-philosophy-software-design-2021",
+    "queries": [
+      {
+        "query": "When the author warns that letting a child class reuse a parent's method bodies creates tight coupling across the whole hierarchy, what does he suggest a designer try first before going that route?",
+        "gold_phrase": "it may be possible to use small helper classes to implement the shared functionality",
+        "leak": 0
+      },
+      {
+        "query": "In the rundown of operations that are fundamentally slow to perform, what timing figure does the author give for a request-and-reply between two machines inside the same facility?",
+        "gold_phrase": "even within a datacenter, a round-trip message exchange can take 10--50",
+        "leak": 0
+      },
+      {
+        "query": "When rewriting a slow piece of code around its common execution flow, how does the author recommend arranging the handling of unusual conditions so they add almost no overhead in the frequent case?",
+        "gold_phrase": "only this one test will need to be made, after which the critical path can be executed",
+        "leak": 0
+      },
+      {
+        "query": "What does the author call the flawed decomposition style where a program's module boundaries mirror the sequence in which its steps run, and which he says commonly leaks knowledge between classes?",
+        "gold_phrase": "the structure of a system corresponds to the time order in which operations will occur",
+        "leak": 0
+      },
+      {
+        "query": "What memorable maxim does the author offer about the ideal capability — one so seamless that a user benefits from it without ever realizing it is present?",
+        "gold_phrase": "The best features are the ones you get without even knowing they exist",
+        "leak": 0.13
+      },
+      {
+        "query": "Where the author disagrees with Robert Martin's insistence that routines be kept extremely tiny, what ordering of design priorities does he advocate as the correct one instead?",
+        "gold_phrase": "first make functions deep, then try to make them short enough to be easily read",
+        "leak": 0
+      },
+      {
+        "query": "In the debate with the Go community over identifier length, which single guideline about how far a symbol's definition sits from where it is used does the author concede he actually agrees with?",
+        "gold_phrase": "The greater the distance between a name's declaration and its uses, the longer",
+        "leak": 0
+      },
+      {
+        "query": "What study does the author cite about what causes most severe breakdowns in large clustered storage systems, used to support his claim that failure-handling code seldom actually runs?",
+        "gold_phrase": "more than 90% of catastrophic failures in distributed data-intensive systems",
+        "leak": 0.13
+      }
+    ]
+  },
+  {
+    "slug": "voss-never-split-the-difference",
+    "queries": [
+      {
+        "query": "In a Latin American kidnapping case, how did persistently pressing the captors' spokesman for details end up forcing the whole gang to keep regrouping to work out their replies?",
+        "gold_phrase": "he didn't really know for sure how to answer, he kept coming out to the jungle",
+        "leak": 0
+      },
+      {
+        "query": "When the author recounts the Manila taxi-driver abductor's opening phone calls, how does he convey the captor's utter indifference to whether the hostage lived or died?",
+        "gold_phrase": "I can always sell his organs in Saudi Arabia",
+        "leak": 0
+      },
+      {
+        "query": "In the passage about introducing yourself by name to create 'forced empathy,' what turned out to be the real backstory of the belligerent drunk who threatened the author in a packed bar?",
+        "gold_phrase": "Turned out he was a Vietnam veteran at a particularly low point",
+        "leak": 0.2
+      },
+      {
+        "query": "In the discussion of telltale signs of dishonesty, what did the Harvard researcher's study conclude about how deceivers over-elaborate and shift grammatical person compared with honest people?",
+        "gold_phrase": "liars use more words than truth tellers and use far more third-person pronouns",
+        "leak": 0.11
+      },
+      {
+        "query": "Where the author argues that meeting in the middle can yield the worst possible result, what homely example about a married couple's differing preferences does he give?",
+        "gold_phrase": "you guessed it, he wears one black and one brown shoe",
+        "leak": 0
+      },
+      {
+        "query": "In the argument that a sense of fairness can override cold logic, what reward-comparison experiment with two animals demonstrates a furious reaction to being shortchanged?",
+        "gold_phrase": "the cucumber-fed monkey literally went bananas",
+        "leak": 0
+      },
+      {
+        "query": "In the tenant's step-by-step haggle to lower his rent using shrinking offers and non-round figures, how did the leasing agent react to the strangely exact number the tenant finally named?",
+        "gold_phrase": "You seem very precise. You must be an accountant.",
+        "leak": 0
+      },
+      {
+        "query": "In the argument that granting your counterpart the freedom to refuse makes talks more constructive, what does the author draw from Jim Camp's book about how fiercely people defend their ability to decline?",
+        "gold_phrase": "people will fight to the death to preserve their right to say",
+        "leak": 0.29
+      }
+    ]
+  },
+  {
+    "slug": "taleb-antifragile-2012",
+    "queries": [
+      {
+        "query": "In the chapter on how artificially suppressing market swings backfires, how does the author describe the type of participant who is unaware of his own vulnerability right up until a long-delayed downturn wipes him out?",
+        "gold_phrase": "someone who is fragile but doesn't know it and is lulled by a false sense of security",
+        "leak": 0
+      },
+      {
+        "query": "In the section on injecting randomness into governance and reshuffling leadership, which Enlightenment-era writer does the author quote to suggest that occasionally eliminating a ruler by force improves the state?",
+        "gold_phrase": "the best form of government was the one tempered with political assassination",
+        "leak": 0
+      },
+      {
+        "query": "Where the author defines modernity as the smoothing of the world's jaggedness, what caged animal does he contrast with its wild relatives to dramatize the tameness of modern existence?",
+        "gold_phrase": "the life of the lion in the comfort and predictability of the Bronx Zoo",
+        "leak": 0
+      },
+      {
+        "query": "In the emergency-room anecdote, how does the physician reply when the author asks for data showing that chilling an injury actually reduces swelling?",
+        "gold_phrase": "You have a nose the size of Cleveland and you are now interested",
+        "leak": 0
+      },
+      {
+        "query": "In the argument that anything long-surviving tends to keep surviving, what pre-Socratic thinker's anecdote about an animal that repeatedly picks one particular resting spot appears?",
+        "gold_phrase": "why a dog prefers to always sleep on the same tile",
+        "leak": 0
+      },
+      {
+        "query": "In the discussion of human-engineered fats that were later shown to be deadly, what convenience advantage does the author list first for the lab-made spread over traditional animal fat?",
+        "gold_phrase": "synthetic products such as margarine stay soft in the refrigerator",
+        "leak": 0
+      },
+      {
+        "query": "In debunking illusions of causation drawn from studying history, what observation about how existence is lived versus recalled does the author borrow from a Danish philosopher?",
+        "gold_phrase": "If life is lived forward but remembered backward, as Kierkegaard observed",
+        "leak": 0.14
+      },
+      {
+        "query": "In challenging the belief that schooling drives a nation's economic growth, what comparison between an East Asian economy and a Southeast Asian one does the author use to argue that prosperity comes first?",
+        "gold_phrase": "In 1960 Taiwan had a much lower literacy rate than the Philippines",
+        "leak": 0
+      }
+    ]
+  }
+]

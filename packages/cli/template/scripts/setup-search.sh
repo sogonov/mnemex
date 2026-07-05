@@ -71,8 +71,10 @@ qmd context add qmd://mnemex-raw  "Raw source materials: full text of books and 
 # ---- 7. Index + embed ----
 echo "==> Indexing"
 qmd update
-echo "==> Generating embeddings (downloads ~2GB of models on first run)"
-qmd embed
+echo "==> Generating embeddings (downloads ~2GB of models on first run; loops until complete)"
+# Resilient: a big first embed can expire the model session partway (exits 0 with
+# chunks still un-vectored). qmd-embed.sh loops until nothing is left to embed.
+"$(cd "$(dirname "$0")" && pwd)/qmd-embed.sh"
 
 echo
 echo "==> Done. Try a search:"

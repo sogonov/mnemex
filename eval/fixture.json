@@ -1,0 +1,135 @@
+{
+  "description": "mnemex Phase-1 retrieval eval over 4 public-domain books (see corpus.md). Measures whether a query retrieves the right source page(s). Run: qmd bench eval/fixture.json --json -c mnemex-wiki",
+  "version": 1,
+  "collection": "mnemex-wiki",
+  "queries": [
+    {
+      "id": "aow-exact",
+      "query": "the art of war sun tzu",
+      "type": "exact",
+      "description": "Title lookup resolves to the Art of War source page.",
+      "expected_files": ["sources/Art-of-War-Sun-Tzu.md"],
+      "expected_in_top_k": 1
+    },
+    {
+      "id": "prince-exact",
+      "query": "the prince machiavelli",
+      "type": "exact",
+      "description": "Title lookup resolves to The Prince source page.",
+      "expected_files": ["sources/The-Prince-Machiavelli.md"],
+      "expected_in_top_k": 1
+    },
+    {
+      "id": "med-exact",
+      "query": "meditations marcus aurelius",
+      "type": "exact",
+      "description": "Title lookup resolves to Meditations source page.",
+      "expected_files": ["sources/Meditations-Marcus-Aurelius.md"],
+      "expected_in_top_k": 1
+    },
+    {
+      "id": "aow-deception",
+      "query": "how to deceive the enemy before a battle",
+      "type": "semantic",
+      "description": "Deception-in-warfare theme is Sun Tzu.",
+      "expected_files": ["sources/Art-of-War-Sun-Tzu.md"],
+      "expected_in_top_k": 1
+    },
+    {
+      "id": "aow-spies",
+      "query": "using spies and gathering intelligence",
+      "type": "semantic",
+      "description": "The chapter on the use of spies is Sun Tzu.",
+      "expected_files": ["sources/Art-of-War-Sun-Tzu.md"],
+      "expected_in_top_k": 1
+    },
+    {
+      "id": "aow-terrain",
+      "query": "military strategy and the use of terrain",
+      "type": "topical",
+      "description": "Terrain/ground classification is Sun Tzu.",
+      "expected_files": ["sources/Art-of-War-Sun-Tzu.md"],
+      "expected_in_top_k": 1
+    },
+    {
+      "id": "prince-feared-loved",
+      "query": "is it better for a ruler to be feared or loved",
+      "type": "semantic",
+      "description": "Classic Machiavelli question.",
+      "expected_files": ["sources/The-Prince-Machiavelli.md"],
+      "expected_in_top_k": 1
+    },
+    {
+      "id": "prince-fortune",
+      "query": "the role of fortune and chance in holding power",
+      "type": "topical",
+      "description": "Fortune (fortuna) is a Machiavelli theme.",
+      "expected_files": ["sources/The-Prince-Machiavelli.md"],
+      "expected_in_top_k": 1
+    },
+    {
+      "id": "med-control",
+      "query": "accepting what is outside your control",
+      "type": "semantic",
+      "description": "Stoic dichotomy of control — Marcus Aurelius.",
+      "expected_files": ["sources/Meditations-Marcus-Aurelius.md"],
+      "expected_in_top_k": 1
+    },
+    {
+      "id": "med-stoicism",
+      "query": "stoicism",
+      "type": "alias",
+      "description": "The school-name alias should surface Meditations.",
+      "expected_files": ["sources/Meditations-Marcus-Aurelius.md"],
+      "expected_in_top_k": 1
+    },
+    {
+      "id": "franklin-virtues",
+      "query": "the thirteen virtues franklin tracked daily",
+      "type": "semantic",
+      "description": "Franklin's 13-virtues chart.",
+      "expected_files": ["sources/Autobiography-Franklin.md"],
+      "expected_in_top_k": 1
+    },
+    {
+      "id": "franklin-habits",
+      "query": "a daily system for building good habits",
+      "type": "semantic",
+      "description": "Franklin's self-improvement method.",
+      "expected_files": ["sources/Autobiography-Franklin.md"],
+      "expected_in_top_k": 1
+    },
+    {
+      "id": "cross-feared-virtue",
+      "query": "virtue as an instrument of power versus virtue as an end",
+      "type": "cross-domain",
+      "description": "Tension between Machiavelli (instrumental) and the Stoic/Franklin (intrinsic) view.",
+      "expected_files": ["sources/The-Prince-Machiavelli.md", "sources/Meditations-Marcus-Aurelius.md"],
+      "expected_in_top_k": 2
+    },
+    {
+      "id": "cross-leader-character",
+      "query": "what kind of character should a leader cultivate",
+      "type": "cross-domain",
+      "description": "Leadership-and-character spans Meditations, Franklin, The Prince.",
+      "expected_files": ["sources/Meditations-Marcus-Aurelius.md", "sources/Autobiography-Franklin.md"],
+      "expected_in_top_k": 2
+    },
+    {
+      "id": "cross-self-discipline",
+      "query": "self-discipline and self-mastery in leaders",
+      "type": "cross-domain",
+      "description": "Self-discipline theme in Meditations and Franklin.",
+      "expected_files": ["sources/Meditations-Marcus-Aurelius.md", "sources/Autobiography-Franklin.md"],
+      "expected_in_top_k": 2
+    },
+    {
+      "id": "cross-strategy-politics",
+      "query": "outmaneuvering rivals through strategy",
+      "type": "cross-domain",
+      "description": "Strategic maneuvering spans Sun Tzu (war) and Machiavelli (politics).",
+      "expected_files": ["sources/Art-of-War-Sun-Tzu.md", "sources/The-Prince-Machiavelli.md"],
+      "expected_in_top_k": 2
+    }
+  ]
+}

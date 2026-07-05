@@ -36,16 +36,24 @@ shift 2
 USE_MARKER=0
 FORCE_OCR=0
 KEEP_INTERMEDIATE=0
+DO_BREADCRUMB=0
+NO_STRUCTURE=0
+KEEP_BOILERPLATE=0
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --marker) USE_MARKER=1 ;;
     --ocr)    FORCE_OCR=1 ;;
     --keep)   KEEP_INTERMEDIATE=1 ;;
+    --breadcrumb) DO_BREADCRUMB=1 ;;
+    --no-structure)  NO_STRUCTURE=1 ;;
+    --keep-boilerplate) KEEP_BOILERPLATE=1 ;;
     *) echo "Unknown option: $1"; exit 1 ;;
   esac
   shift
 done
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 WIKI_ROOT="${WIKI_ROOT:-${BRAIN_DIR:-$HOME/mnemex}}"
 OUT_DIR="$WIKI_ROOT/raw/books/$SLUG"
@@ -200,6 +208,47 @@ language: ""
 pages:
 llm_ingested: false
 EOF
+
+# ---- auto-fill metadata from the Gutenberg header (BEFORE strip removes it) ----
+# The license header carries Title/Author/Translator/Editor/Release-date/Language.
+# Parse it into meta.yaml so the owner doesn't retype it. Only fills empty fields.
+if command -v node >/dev/null 2>&1 && [ -f "$SCRIPT_DIR/extract-meta.mjs" ]; then
+  log "Extracting metadata from Gutenberg header"
+  node "$SCRIPT_DIR/extract-meta.mjs" "$OUT_DIR/book.md" "$OUT_DIR/meta.yaml" || log "extract-meta skipped (non-fatal)"
+fi
+
+# ---- strip Project Gutenberg license boilerplate ----
+# Drop the ~25-line license header + long license footer that bracket every
+# Gutenberg text (delimited by *** START *** / *** END *** markers). Runs after
+# metadata extraction so all downstream line numbers — and every ^[raw:L-L]
+# provenance token — are clean. No markers (non-Gutenberg) → no-op. --keep-boilerplate.
+if [ "$KEEP_BOILERPLATE" -eq 0 ] && command -v node >/dev/null 2>&1 && [ -f "$SCRIPT_DIR/strip-boilerplate.mjs" ]; then
+  log "Stripping Project Gutenberg boilerplate (--keep-boilerplate to skip)"
+  node "$SCRIPT_DIR/strip-boilerplate.mjs" "$OUT_DIR/book.md" || log "strip-boilerplate skipped (non-fatal)"
+fi
+
+# ---- structure recovery (Gutenberg plain text → ATX headings) ----
+# Promote flat division markers (BOOK/PART/CHAPTER … + numeral) to real headings.
+# COSMETIC/navigation only: it turns a 0-heading Gutenberg blob into a chaptered,
+# outline-able document (Obsidian outline pane, folding). The 3-arm test found NO
+# retrieval benefit (see eval/BASELINE.md) — kept on because it's a deterministic,
+# visible improvement that doesn't hurt retrieval, not because it lifts recall.
+# High precision, body-confined, idempotent. Opt out with --no-structure.
+if [ "$NO_STRUCTURE" -eq 0 ] && command -v node >/dev/null 2>&1 && [ -f "$SCRIPT_DIR/structure.mjs" ]; then
+  log "Recovering heading structure (--no-structure to skip)"
+  node "$SCRIPT_DIR/structure.mjs" "$OUT_DIR/book.md" || log "structure pass skipped (non-fatal)"
+fi
+
+# ---- contextual breadcrumbs (OFF by default — opt in with --breadcrumb) ----
+# Injects ancestor-path breadcrumbs under nested headings. A controlled 3-arm test
+# (n=48, eval/probe3-*, see eval/BASELINE.md) found NO significant retrieval effect
+# (A vs +breadcrumb: Δ+2.1 pts, p=1.0) — the per-section breadcrumb doesn't reach the
+# deep chunks qmd splits off, and qmd already carries docTitle + nearest heading. So
+# it only adds noise lines to raw for no measured benefit; kept opt-in, not default.
+if [ "$DO_BREADCRUMB" -eq 1 ] && command -v node >/dev/null 2>&1 && [ -f "$SCRIPT_DIR/breadcrumb.mjs" ]; then
+  log "Injecting contextual breadcrumbs (--breadcrumb opt-in)"
+  node "$SCRIPT_DIR/breadcrumb.mjs" "$OUT_DIR/book.md" || log "breadcrumb pass skipped (non-fatal)"
+fi
 
 # ---- cleanup ----
 if [ "$KEEP_INTERMEDIATE" -eq 0 ]; then

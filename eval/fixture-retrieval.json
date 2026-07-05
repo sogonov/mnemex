@@ -1,0 +1,42 @@
+{
+  "description": "Query-driven retrieval eval for run-retrieval.mjs. Stratified buckets + dev/holdout split. Paths are relative to the collection root (e.g. sources/X.md). no-answer queries have empty expected_files (assert abstention). Separate from fixture.json (which drives qmd bench).",
+  "version": 1,
+  "queries": [
+    { "id": "aow-exact", "q": "the art of war sun tzu", "bucket": "exact/title", "split": "dev", "expected_files": ["sources/Art-of-War-Sun-Tzu.md"] },
+    { "id": "prince-exact", "q": "the prince machiavelli", "bucket": "exact/title", "split": "dev", "expected_files": ["sources/The-Prince-Machiavelli.md"] },
+    { "id": "med-exact", "q": "meditations marcus aurelius", "bucket": "exact/title", "split": "dev", "expected_files": ["sources/Meditations-Marcus-Aurelius.md"] },
+    { "id": "aow-deception", "q": "how to deceive the enemy before a battle", "bucket": "single-hop", "split": "dev", "expected_files": ["sources/Art-of-War-Sun-Tzu.md"] },
+    { "id": "aow-spies", "q": "using spies and gathering intelligence", "bucket": "single-hop", "split": "dev", "expected_files": ["sources/Art-of-War-Sun-Tzu.md"] },
+    { "id": "aow-terrain", "q": "military strategy and the use of terrain", "bucket": "single-hop", "split": "dev", "expected_files": ["sources/Art-of-War-Sun-Tzu.md"] },
+    { "id": "prince-feared-loved", "q": "is it better for a ruler to be feared or loved", "bucket": "single-hop", "split": "dev", "expected_files": ["sources/The-Prince-Machiavelli.md"] },
+    { "id": "prince-fortune", "q": "the role of fortune and chance in holding power", "bucket": "single-hop", "split": "dev", "expected_files": ["sources/The-Prince-Machiavelli.md"] },
+    { "id": "med-control", "q": "accepting what is outside your control", "bucket": "single-hop", "split": "dev", "expected_files": ["sources/Meditations-Marcus-Aurelius.md"] },
+    { "id": "med-stoicism", "q": "stoicism", "bucket": "single-hop", "split": "dev", "expected_files": ["sources/Meditations-Marcus-Aurelius.md"] },
+    { "id": "franklin-virtues", "q": "the thirteen virtues franklin tracked daily", "bucket": "single-hop", "split": "dev", "expected_files": ["sources/Autobiography-Franklin.md"] },
+    { "id": "franklin-habits", "q": "a daily system for building good habits", "bucket": "single-hop", "split": "dev", "expected_files": ["sources/Autobiography-Franklin.md"] },
+    { "id": "cross-feared-virtue", "q": "virtue as an instrument of power versus virtue as an end", "bucket": "cross-source", "split": "dev", "expected_files": ["sources/The-Prince-Machiavelli.md", "sources/Meditations-Marcus-Aurelius.md"] },
+    { "id": "cross-leader-character", "q": "what kind of character should a leader cultivate", "bucket": "cross-source", "split": "dev", "expected_files": ["sources/Meditations-Marcus-Aurelius.md", "sources/Autobiography-Franklin.md"] },
+    { "id": "cross-self-discipline", "q": "self-discipline and self-mastery in leaders", "bucket": "cross-source", "split": "dev", "expected_files": ["sources/Meditations-Marcus-Aurelius.md", "sources/Autobiography-Franklin.md"] },
+    { "id": "cross-strategy-politics", "q": "outmaneuvering rivals through strategy", "bucket": "cross-source", "split": "dev", "expected_files": ["sources/Art-of-War-Sun-Tzu.md", "sources/The-Prince-Machiavelli.md"] },
+
+    { "id": "hcs-power-vs-virtue", "q": "power through strategy versus power through personal virtue", "bucket": "cross-source", "split": "holdout", "expected_files": ["sources/The-Prince-Machiavelli.md", "sources/Meditations-Marcus-Aurelius.md"] },
+    { "id": "hcs-master-self", "q": "how a leader masters himself before leading others", "bucket": "cross-source", "split": "holdout", "expected_files": ["sources/Meditations-Marcus-Aurelius.md", "sources/Autobiography-Franklin.md"] },
+    { "id": "hcs-reputation", "q": "the place of reputation and appearances in getting ahead", "bucket": "cross-source", "split": "holdout", "expected_files": ["sources/The-Prince-Machiavelli.md", "sources/Autobiography-Franklin.md"] },
+    { "id": "hcs-discipline-mind-state", "q": "discipline of the mind versus discipline of the state", "bucket": "cross-source", "split": "holdout", "expected_files": ["sources/Meditations-Marcus-Aurelius.md", "sources/The-Prince-Machiavelli.md"] },
+    { "id": "hcs-foresight-force", "q": "prevailing by foresight rather than brute force", "bucket": "cross-source", "split": "holdout", "expected_files": ["sources/Art-of-War-Sun-Tzu.md", "sources/The-Prince-Machiavelli.md"] },
+    { "id": "hcs-plan-discipline-unedged", "q": "planning ahead and disciplined preparation for success", "bucket": "cross-source", "split": "holdout", "expected_files": ["sources/Art-of-War-Sun-Tzu.md", "sources/Autobiography-Franklin.md"] },
+    { "id": "hcs-foresight-habit-unedged", "q": "foresight in strategy and steady daily habits", "bucket": "cross-source", "split": "holdout", "expected_files": ["sources/Art-of-War-Sun-Tzu.md", "sources/Autobiography-Franklin.md"] },
+
+    { "id": "xl-feared-loved-ru", "q": "лучше ли правителю быть в страхе или в любви у народа", "bucket": "cross-lingual", "split": "holdout", "expected_files": ["sources/The-Prince-Machiavelli.md"] },
+    { "id": "xl-deception-ru", "q": "как обманывать врага перед сражением", "bucket": "cross-lingual", "split": "holdout", "expected_files": ["sources/Art-of-War-Sun-Tzu.md"] },
+    { "id": "xl-control-ru", "q": "принятие того, что не в нашей власти", "bucket": "cross-lingual", "split": "holdout", "expected_files": ["sources/Meditations-Marcus-Aurelius.md"] },
+    { "id": "xl-virtues-ru", "q": "тринадцать добродетелей Франклина и ежедневный учёт", "bucket": "cross-lingual", "split": "holdout", "expected_files": ["sources/Autobiography-Franklin.md"] },
+    { "id": "xl-spies-ru", "q": "использование шпионов и сбор разведданных на войне", "bucket": "cross-lingual", "split": "holdout", "expected_files": ["sources/Art-of-War-Sun-Tzu.md"] },
+    { "id": "xl-stoicism-ru", "q": "стоицизм и спокойствие духа", "bucket": "cross-lingual", "split": "holdout", "expected_files": ["sources/Meditations-Marcus-Aurelius.md"] },
+
+    { "id": "na-neural-net", "q": "how does gradient descent train a neural network", "bucket": "no-answer", "split": "holdout", "expected_files": [] },
+    { "id": "na-kubernetes", "q": "best practices for kubernetes horizontal autoscaling", "bucket": "no-answer", "split": "holdout", "expected_files": [] },
+    { "id": "na-borscht-ru", "q": "рецепт борща со сметаной", "bucket": "no-answer", "split": "holdout", "expected_files": [] },
+    { "id": "na-quantum", "q": "quantum error correction with surface codes", "bucket": "no-answer", "split": "holdout", "expected_files": [] }
+  ]
+}
