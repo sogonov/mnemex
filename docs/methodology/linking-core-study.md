@@ -24,7 +24,10 @@ significant improvement lives.
 | **Measurement** | 🟡 floors (`minWikilinks`) — a floor is not recall | ❌ nothing | ✅ measures retrieval **and the linking itself** ⬆ (suggester 73% precision, +6% graph density) |
 
 **Honest verdict (updated).** llmwiki still wins on **mechanical completeness + retroactive
-self-heal** (auto-rescan of old pages on a new concept — mnemex has no true equivalent). cobsidian wins
+self-heal** (auto-rescan of old pages on a new concept — mnemex has no true equivalent) — but that
+completeness is **exhaustive, not precise**: its string resolver is a measured ~50%-noisy mechanism
+(see *Rejected: link-mentions*), whereas mnemex's semantic suggester hits 73% by disambiguating
+polysemy. cobsidian wins
 on typed + contradiction discipline breadth. mnemex wins on **typed-edge quality + provenance +
 measurement**, and — after this session — **closed its one big gap: semantic connection DISCOVERY**
 via `suggest-links` (qmd), measured at 73% precision / +6% graph density. So no system dominates: the
@@ -107,6 +110,35 @@ wrong extrapolation from a single warm query; the real batch cost is ~15s/page.
 > **Correction note.** An earlier version of this doc / the script header claimed "~2s/page warm."
 > That was extrapolated from one back-to-back warm query and is wrong — the measured per-page cost in
 > a real batch is ~15s. Latency is a genuine cost to weigh, not a footnote.
+
+## Rejected: deterministic title-mention linking (`link-mentions`) — measured 48%, cut
+
+llmwiki wins the *mechanical-completeness* axes (edge creation / retroactive self-heal / backlinks)
+with a deterministic resolver: scan page bodies for exact mentions of other pages' titles and link
+them. It looked cheap and high-precision to match ("if the prose literally names a concept, linking
+it is surely right"), so it was built (`link-mentions.mjs`, suggest-only, with a specificity guard)
+and **measured** on the real brain: a full scan found **1,820 unlinked title mentions across 525/615
+pages**; a 40-pair sample was judged should-link/no by strict independent agents.
+
+**Result: 48% precision (19/40) — WORSE than the semantic suggester's 73%. Cut, not shipped.**
+
+- **Why: polysemy (17 of 21 false positives).** Page titles are often common words that mean
+  different things in context — `Partitioning` (DB sharding vs. architectural decomposition),
+  `Delegation` (a `delegate()` call vs. management), `Output` (Newport's craft sense vs. Cagan's
+  outcome-vs-output). Exact string match is context-blind; the semantic reranker isn't (a chunk about
+  DB partitioning doesn't semantically match an architecture page), which is exactly why
+  suggest-links scores 73% and this scores 48%. The remaining 4 were our own over-reach (matching
+  aliases with a hyphen like `lock-in` that slipped the specificity guard).
+- **Does llmwiki avoid it? No — it's worse, just unmeasured.** Its `resolver.ts` (read directly)
+  matches the frontmatter `title` with **no** length/stopword/specificity guard at all (we at least
+  skip short generic words), and it **auto-writes** the link into the page — so its polysemy errors
+  become wrong links polluting the wiki, where ours were only suggestions an agent rejects. llmwiki's
+  own code review lists this as a weakness. Its eval measures retrieval, never link correctness, so
+  the noise is invisible. **Their "win" on these axes is an unmeasured ~50%-noisy mechanism.**
+- **Takeaway.** Matching llmwiki's string resolver is not worth it — the semantic suggester is the
+  strictly better mechanism (73% > 48%) *because* it disambiguates polysemy. We do not need to close
+  the mechanical-completeness gap with string matching; we already beat it on precision with meaning.
+  Negative result kept on the record, same as the breadcrumb test.
 
 ## What the adversarial pass CUT (and why) — read before building
 
